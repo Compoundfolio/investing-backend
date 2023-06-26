@@ -1,0 +1,24 @@
+services:
+  web:
+    image: "investing-backend-rs"
+    ports:
+      - "4430:4430"
+    profiles: ["deployed"]
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: "postgres"
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - /var/run/postgresql:/var/run/postgresql
+    environment:
+      POSTGRES_DB: compoundfoliodb
+      POSTGRES_USER: compoundfoliodbadmin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-example}
+

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Static Authorization</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <style>
+            xmp{ white-space:pre-wrap; word-wrap:break-word; }
+        </style>
+    </head>
+    <body>
+        <xmp id="token"></xmp>
+        <script>
+            const API_URL = "https://backend.compoundfolio.com:4330"
+            const REDIRECT_URI = "https://backend.compoundfolio.com:4330/static/callback.html"
+
+            const params = new URLSearchParams(window.location.search)
+            const code = params.get("code")
+            const state = params.get("state")
+
+            fetch(API_URL + "/auth/google", {
+                method: "POST",
+                body: JSON.stringify({code, state, redirect_uri: REDIRECT_URI}),
+                headers: [["Content-Type", "application/json"]]
+            }).then(response => {
+                if (response.ok) {
+                    return response.json()
+                } else {
+                    throw new Error("Backend responded with bad response code: " + response.statusCode)
+                }
+            }).then(body => {
+                document.getElementById("token").textContent = JSON.stringify(body)
+            }).catch(error => {
+                console.error(error)
+                alert("Request failed with an error, check developer console for details")
+            })
+        </script>
+    </body>
+</html>
+
+
+
+
