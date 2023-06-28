@@ -16,38 +16,12 @@ env:
   APP_NAME: investing-backend-rs
 
 jobs:
-  build:
-    name: Build and test Rust code
+  deploy:
+    name: Build and deploy Docker image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Cache built artifacts
-        uses: actions/cache@v3
-        with:
-          key: target-release
-          path: target/release
-      - name: Cargo build
-        run: cargo build --release      # TODO: ADD TESTS
-      
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: target-release
-          path: target/release
-          retention-days: 5
-
-  package:
-    name: Build Docker image
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Load build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: target-release
       - name: Decrypt configuration
         run: ./decrypt-config.sh prod
         env:
@@ -55,41 +29,21 @@ jobs:
       - name: Build image
         run: docker build -t $APP_NAME .
       - name: Save image
-        run: docker save -o $APP_NAME.tar "${APP_NAME}:latest"  # TODO: this will be tag version
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: docker-image
-          path: |
-            ${{ env.APP_NAME }}.tar
-            docker-compose.yml
-          retention-days: 5
-  deploy:
-    name: Deploy Docker image
-    needs: package
-    runs-on: ubuntu-latest
-    steps:
-      - name: Load Docker image
-        uses: actions/download-artifact@v3
-        with:
-          name: docker-image
+        run: docker save -o $APP_NAME.tar "${APP_NAME}:latest" # TODO: tag
       - name: Set up SSH keys
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H ${{ env.SSH_HOST }} > ~/.ssh/known_hosts
       - name: Upload image to server
-        run: rsync -avz $APP_NAME.tar docker-compose.yml ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:~/backend/
+        run: rsync -avz $APP_NAME.tar docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/backend/
       - name: Start the backend
         run: |
-          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} -o SendEnv=DATABASE_PASSWORD <<EOF
-              cd ~/images
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -o SendEnv=DATABASE_PASSWORD <<EOF
+              cd ~/backend
               docker-compose --profile deployed down
               docker load -i $APP_NAME.tar
               docker-compose --profile deployed up -d --no-color
           EOF
         env:
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-        
-
-        
