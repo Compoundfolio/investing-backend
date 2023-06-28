@@ -16,6 +16,7 @@ chrono = { version = "0.4.24", features = ["serde"] }
 config = { version = "0.13.3", features = ["toml"] }
 diesel = { version = "2.1.0", features = ["postgres", "r2d2", "uuid"] }
 diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
+diesel_migrations = { version = "2.1.0", features = ["postgres"] }
 jsonwebtoken = "8.3.0"
 jsonwebtoken-google = "0.1.6"
 oauth2 = "4.4.0"

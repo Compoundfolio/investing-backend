@@ -11,8 +11,8 @@
     <body>
         <xmp id="token"></xmp>
         <script>
-            const API_URL = "https://backend.compoundfolio.com:4330"
-            const REDIRECT_URI = "https://backend.compoundfolio.com:4330/static/callback.html"
+            const API_URL = window.location.origin
+            const REDIRECT_URI = API_URL + "/static/callback.html"
 
             const params = new URLSearchParams(window.location.search)
             const code = params.get("code")

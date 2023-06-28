@@ -14,11 +14,16 @@ use axum_server::tls_openssl::OpenSSLConfig;
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
+use diesel_migrations::FileBasedMigrations;
+use diesel_migrations::MigrationHarness;
+use diesel_migrations::HarnessWithOutput;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
 
 use std::net::SocketAddr;
 use std::sync::Arc;
+
+
 
 pub struct ApplicationState {
     pub settings: Settings,
@@ -71,10 +76,22 @@ async fn main() {
 
 pub fn establish_sql_connection(sql_url: &str) -> Pool<ConnectionManager<PgConnection>> {
     let manager = ConnectionManager::<PgConnection>::new(sql_url);
-    Pool::builder()
+
+    let pool = Pool::builder()
         .test_on_check_out(true)
         .build(manager)
-        .expect("Could not build sql db connection pool")
+        .expect("Could not build sql db connection pool");
+
+    let mut conn = pool.get()
+        .expect("Could not get connection from pool to run migrations");
+
+    let migrations = FileBasedMigrations::find_migrations_directory()
+        .expect("Could not find migrationsto run");
+    HarnessWithOutput::write_to_stdout(&mut conn)
+        .run_pending_migrations(migrations)
+        .expect("There was an error running migrations");
+
+    pool
 }
 
 pub fn establish_redis_connection(redus_url: &str) -> redis::Client {

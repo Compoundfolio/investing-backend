@@ -7,10 +7,10 @@
     </head>
     <body>
         <script>
-            const API_URL = "https://backend.compoundfolio.com:4330"
+            const API_URL = window.location.origin
             const AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
-            const CLIENT_ID = "931638889409-poa2ul8vgh9iqmu4d3da2k9a1lfsucsp.apps.googleusercontent.com"
-            const REDIRECT_URI = "https://backend.compoundfolio.com:4330/static/callback.html"
+            const CLIENT_ID = "931638889409-sae0418fd2avajvedptnmcpb7hh85ue0.apps.googleusercontent.com"
+            const REDIRECT_URI = API_URL + "/static/callback.html"
             
             const login_with_google = () => {
                 fetch(API_URL + "/auth/state")
