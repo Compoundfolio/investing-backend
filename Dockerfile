@@ -9,4 +9,5 @@ RUN apt-get update && apt-get install -y postgresql-client
 COPY . .
 COPY --from=builder /usr/local/cargo/bin/investing-backend-rs ./
 EXPOSE 4430
+ENV RUN_MODE prod
 CMD ["./investing-backend-rs"]

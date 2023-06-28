@@ -20,5 +20,5 @@ services:
     environment:
       POSTGRES_DB: compoundfoliodb
       POSTGRES_USER: compoundfoliodbadmin
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-example}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-example}
 

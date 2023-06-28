@@ -41,7 +41,7 @@ async fn main() {
     let cors = CorsLayer::new().allow_methods(Any).allow_origin(Any);
 
     let settings =
-        Settings::from_config_file("config.toml").expect("Expected to read configuration file");
+        Settings::from_config().expect("Expected to read configuration file");
     let state = ApplicationState {
         http_client: reqwest::Client::new(),
         repository: CommonRepository::new(establish_sql_connection(&settings.datasource.sql_url)),

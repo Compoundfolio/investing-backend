@@ -1,4 +1,6 @@
-use config::{Config, ConfigError, File};
+use std::env;
+
+use config::{Config, ConfigError, File, Environment};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -28,9 +30,11 @@ pub struct Datasources {
 }
 
 impl Settings {
-    pub fn from_config_file(path: &str) -> Result<Self, ConfigError> {
+    pub fn from_config() -> Result<Self, ConfigError> {
+        let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "local".into());
         Config::builder()
-            .add_source(File::with_name(path))
+            .add_source(File::with_name(&format!("config.{run_mode}.toml")))
+            .add_source(Environment::with_prefix("app").separator("__"))
             .build()?
             .try_deserialize()
     }
