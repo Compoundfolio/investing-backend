@@ -23,8 +23,6 @@ use tower_http::services::ServeDir;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-
-
 pub struct ApplicationState {
     pub settings: Settings,
     pub http_client: reqwest::Client,
@@ -47,13 +45,21 @@ async fn main() {
 
     let settings =
         Settings::from_config().expect("Expected to read configuration file");
+
+    let use_ssl = settings.web.use_ssl;
+    let port = settings.web.port;
+
     let state = ApplicationState {
         http_client: reqwest::Client::new(),
-        repository: CommonRepository::new(establish_sql_connection(&settings.datasource.sql_url)),
+        repository: CommonRepository::new(establish_sql_connection(
+                &settings.datasource.sql_url, 
+                settings.datasource.run_migrations
+                )),
         google_jwt_parser: jsonwebtoken_google::Parser::new(&settings.auth.google.client_id),
         redis: establish_redis_connection(&settings.datasource.redis_url),
         settings,
     };
+
 
     let app = Router::new()
         .merge(crate::web::routes::auth::routes())
@@ -63,18 +69,26 @@ async fn main() {
         .layer(cors)
         .with_state(Arc::new(state));
 
-    let ssl_config = OpenSSLConfig::from_pem_file("./certs/tls.crt", "./certs/tls.key")
-        .expect("Could not build open sslf config from pem files");
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 4430));
-    println!("listening on https://{}", addr);
-    axum_server::bind_openssl(addr, ssl_config)
-        .serve(app.into_make_service())
-        .await
-        .expect("Should have started the server");
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    println!("listening on {}", addr);
+
+    if use_ssl {
+        let ssl_config = OpenSSLConfig::from_pem_file("./certs/tls.crt", "./certs/tls.key")
+            .expect("Could not build open sslf config from pem files");
+        axum_server::bind_openssl(addr, ssl_config)
+            .serve(app.into_make_service())
+            .await
+            .expect("Should have started the https server");
+    } else { 
+        axum_server::bind(addr)
+            .serve(app.into_make_service())
+            .await
+            .expect("Should have started the http server");
+    };
 }
 
-pub fn establish_sql_connection(sql_url: &str) -> Pool<ConnectionManager<PgConnection>> {
+pub fn establish_sql_connection(sql_url: &str, run_migrations: bool) -> Pool<ConnectionManager<PgConnection>> {
     let manager = ConnectionManager::<PgConnection>::new(sql_url);
 
     let pool = Pool::builder()
@@ -82,14 +96,16 @@ pub fn establish_sql_connection(sql_url: &str) -> Pool<ConnectionManager<PgConne
         .build(manager)
         .expect("Could not build sql db connection pool");
 
-    let mut conn = pool.get()
-        .expect("Could not get connection from pool to run migrations");
+    if run_migrations {
+        let mut conn = pool.get()
+            .expect("Could not get connection from pool to run migrations");
 
-    let migrations = FileBasedMigrations::find_migrations_directory()
-        .expect("Could not find migrationsto run");
-    HarnessWithOutput::write_to_stdout(&mut conn)
-        .run_pending_migrations(migrations)
-        .expect("There was an error running migrations");
+        let migrations = FileBasedMigrations::find_migrations_directory()
+            .expect("Could not find migrationsto run");
+        HarnessWithOutput::write_to_stdout(&mut conn)
+            .run_pending_migrations(migrations)
+            .expect("There was an error running migrations");
+    }
 
     pool
 }

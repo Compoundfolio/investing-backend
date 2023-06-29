@@ -23,4 +23,9 @@ services:
       POSTGRES_DB: compoundfoliodb
       POSTGRES_USER: compoundfoliodbadmin
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-example}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U compoundfoliodbadmin -d compoundfoliodb"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
 

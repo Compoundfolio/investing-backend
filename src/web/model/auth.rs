@@ -99,7 +99,7 @@ pub enum AuthenticationFlowError {
 
 impl IntoResponse for AuthenticationFlowError {
     fn into_response(self) -> Response {
-        // TODO: Add logging, as auth errors may be sign of broken system or malicouse attocks
+        tracing::error!("Authentication flow error: {}", self);
         use AuthenticationFlowError::*;
         let code = match self {
             RequestValidationFailed { .. } => StatusCode::BAD_REQUEST,

@@ -5,8 +5,15 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
+    pub web: WebSettings,
     pub auth: AuthSettings,
     pub datasource: Datasources,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct WebSettings {
+    pub use_ssl: bool,
+    pub port: u16,
 }
 
 #[derive(Debug, Deserialize)]
@@ -27,6 +34,7 @@ pub struct AuthProviderSettings {
 pub struct Datasources {
     pub sql_url: String,
     pub redis_url: String,
+    pub run_migrations: bool
 }
 
 impl Settings {
