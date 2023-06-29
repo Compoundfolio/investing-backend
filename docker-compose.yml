@@ -2,11 +2,11 @@ services:
   web:
     image: "investing-backend-rs"
     ports:
-      - "4430:4430"
+      - "8080:8080"
     profiles: ["deployed"]
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
 
   redis:
     image: "redis:alpine"

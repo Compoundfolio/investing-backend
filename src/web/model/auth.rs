@@ -63,7 +63,7 @@ impl IntoResponse for AuthenticationError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum AuthenticationFlowError {
-    #[error("There was a problem sending requests to the identity servier: {source:?}")]
+    #[error("There was a problem sending requests to the identity servier: {source} {source:?}")]
     IdentityServerRequestFailure { #[from] source: reqwest::Error, },
     #[error("Identity server responded with an error: {body:?}")]
     IdentityServerBadResponseStatus { body: String },
