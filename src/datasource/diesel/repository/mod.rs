@@ -12,12 +12,12 @@ use diesel::r2d2::Pool;
 
 #[derive(Error, Debug)]
 pub enum RepositoryError {
-    #[error("Database connection pool error")]
+    #[error("Database connection pool error: {source}")]
     ConnectionPool {
         #[from]
         source: r2d2::Error,
     },
-    #[error("Database ORM error")]
+    #[error("Database ORM error: {source}")]
     Diesel {
         #[from]
         source: diesel::result::Error,

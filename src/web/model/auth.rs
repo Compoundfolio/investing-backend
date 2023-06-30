@@ -73,11 +73,11 @@ pub enum AuthenticationFlowError {
     UnexpectedIdentityServerResponseSchema { reason: &'static str },
     #[error("Server failed to generate a JWT: {source:?}")]
     JsonWebTokenFailure { #[from] source: jsonwebtoken::errors::Error, },
-    #[error("Server failed at accessing its datadource: {source:?}")]
+    #[error("Server failed at accessing its datadource: {source}")]
     DatasourceAccessFailure { #[from] source: RepositoryError, },
-    #[error("There was a problem connecting to Redis datasource, authentication can't be completed: {source:?}")]
+    #[error("There was a problem connecting to Redis datasource, authentication can't be completed: {source}")]
     RedisConnectionIssue { #[from] source: redis::RedisError, },
-    #[error("Request is invalid: {source:?}")]
+    #[error("Request is invalid:\n{source}")]
     RequestValidationFailed { #[from] source: validator::ValidationErrors, },
     #[error("Server has a problem hashing this password to store it in its database.")]
     PasswordHashingFailure,
@@ -99,7 +99,7 @@ pub enum AuthenticationFlowError {
 
 impl IntoResponse for AuthenticationFlowError {
     fn into_response(self) -> Response {
-        tracing::error!("Authentication flow error: {}", self);
+        tracing::error!("Authentication flow error: {:?}", self);
         use AuthenticationFlowError::*;
         let code = match self {
             RequestValidationFailed { .. } => StatusCode::BAD_REQUEST,

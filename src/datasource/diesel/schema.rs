@@ -28,4 +28,7 @@ diesel::table! {
 
 diesel::joinable!(app_user_login_method -> app_user (app_user_id));
 
-diesel::allow_tables_to_appear_in_same_query!(app_user, app_user_login_method,);
+diesel::allow_tables_to_appear_in_same_query!(
+    app_user,
+    app_user_login_method,
+);

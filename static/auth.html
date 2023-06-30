@@ -4,6 +4,9 @@
         <meta charset="UTF-8" />
         <title>Static Authorization</title>
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <style>
+            xmp{ white-space:pre-wrap; word-wrap:break-word; }
+        </style>
     </head>
     <body>
         <script>
@@ -11,15 +14,25 @@
             const AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
             const CLIENT_ID = "931638889409-sae0418fd2avajvedptnmcpb7hh85ue0.apps.googleusercontent.com"
             const REDIRECT_URI = API_URL + "/static/callback.html"
+
+            const success = (message) => {
+                document.getElementById("token").textContent = JSON.stringify(message)
+                document.getElementById("error").textContent = ""
+            }
+
+            const failure = (message) => {
+                document.getElementById("error").textContent = JSON.stringify(message)
+                document.getElementById("token").textContent = ""
+            }
             
             const login_with_google = () => {
+                success("Loading...")
                 fetch(API_URL + "/auth/state")
                     .then(response => {
                         if (response.status == "200") {
                             return response.json()
                         } else {
-                            alert("Could not get state token from server, check console for details")
-                            console.error(response)
+                            response.text().then(failure)
                         }
                     })
                     .then(body => {
@@ -30,11 +43,77 @@
                         window.location.href = auth_src
                     })
                     .catch(e => {
-                        alert("Could not make a request to backend to get the state token. Check console for details")
                         console.error(e)
+                        failure(e)
+                    })
+            }
+            
+            const signup = () => {
+                success("Loading...")
+                const form = document.querySelector("form")
+                const email = form['email'].value
+                const password = form['password'].value
+
+                fetch(API_URL + "/auth/signup", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", },
+                    body: JSON.stringify({ email, password })
+                })
+                    .then(response => {
+                        if (response.status == "200") {
+                            return response.json()
+                        } else {
+                            response.text().then(failure)
+                        }
+                    })
+                    .then(body => {
+                        success(body)
+                    })
+                    .catch(e => {
+                        console.error(e)
+                        failure(e)
+                    })
+            }
+
+            const signin = () => {
+                success("Loading...")
+                const form = document.querySelector("form")
+                const email = form['email'].value
+                const password = form['password'].value
+
+                fetch(API_URL + "/auth/signin", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", },
+                    body: JSON.stringify({ email, password })
+                })
+                    .then(response => {
+                        if (response.status == "200") {
+                            return response.json()
+                        } else {
+                            response.text().then(failure)
+                        }
+                    })
+                    .then(body => {
+                        document.getElementById("token").textContent = JSON.stringify(body)
+                    })
+                    .catch(e => {
+                        console.error(e)
+                        error(e)
                     })
             }
         </script>
-        <button id="sign-in-google" onclick="login_with_google()">Sign In with Google</button>
+        <center>
+            <button id="sign-in-google" onclick="login_with_google()">Sign In with Google</button>
+            <br>or<br>
+            <form>
+                <input type="text" placeholder="Enter Email" name="email" required><br>
+                <input type="password" placeholder="Enter Password" name="password" required>
+
+            </form>
+            <button id="sign-up" onclick="signup()">Sign Up</button>
+            <button id="sign-in" onclick="signin()">Sign In</button>
+        </center>
+        <xmp id="error" style="color: red"></xmp>
+        <xmp id="token" style="color: green"></xmp>
     </body>
 </html>
