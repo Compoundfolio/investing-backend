@@ -6,7 +6,7 @@ mod web;
 
 use crate::datasource::diesel::repository::CommonRepository;
 use crate::settings::Settings;
-use crate::web::model::graphql::QueryRoot;
+use crate::web::routes::graphql::QueryRoot;
 
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use axum::{extract::Extension, routing::get_service, Router};
@@ -34,14 +34,12 @@ pub struct ApplicationState {
 #[tokio::main]
 async fn main() {
 
-    use tracing_subscriber::prelude::*;
-    use tracing_subscriber::util::SubscriberInitExt;
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer())
-        .init();
+    tracing_subscriber::fmt()
+          .with_max_level(tracing::Level::INFO)
+          .init();
 
     let graphsql_schema = Schema::build(QueryRoot, EmptyMutation, EmptySubscription).finish();
-    let cors = CorsLayer::new().allow_methods(Any).allow_origin(Any);
+    let cors = CorsLayer::new().allow_methods(Any).allow_origin(Any).allow_headers(Any);
 
     let settings =
         Settings::from_config().expect("Expected to read configuration file");
@@ -71,7 +69,7 @@ async fn main() {
 
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
-    println!("listening on {}", addr);
+    tracing::info!("listening on {}", addr);
 
     if use_ssl {
         let ssl_config = OpenSSLConfig::from_pem_file("./certs/tls.crt", "./certs/tls.key")

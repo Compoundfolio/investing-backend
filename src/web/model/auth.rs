@@ -1,3 +1,4 @@
+use axum::Json;
 use axum::extract::rejection::TypedHeaderRejection;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -7,13 +8,16 @@ use validator::Validate;
 use validator::ValidationError;
 
 use crate::datasource::diesel::repository::RepositoryError;
+use crate::web::model::CommonErrorResponse;
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StateTokenResponse {
     pub state: String,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GoogleAuthRequest {
     pub state: String,
     pub code: String,
@@ -21,6 +25,7 @@ pub struct GoogleAuthRequest {
 }
 
 #[derive(Debug, Deserialize, Validate)]
+#[serde(rename_all = "camelCase")]
 pub struct SignupAuthRequest {
     #[validate(email)]
     pub email: String,
@@ -29,12 +34,14 @@ pub struct SignupAuthRequest {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SigninAuthRequest {
     pub email: String,
     pub password: String,
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AuthTokenResponse {
     pub token: String,
     pub expires_at: usize,
@@ -43,41 +50,44 @@ pub struct AuthTokenResponse {
 
 #[derive(thiserror::Error, Debug)]
 pub enum AuthenticationError {
-    #[error("This endpoint requires you to include the following headers in your request: {source:?}")]
+    #[error("Resource you tried to access requires authentication. Try ot sign in or sign up.")]
     InvalidAuthHeaders { #[from] source: TypedHeaderRejection },
-    #[error("Token you provided failed verification: {source}")]
+    #[error("Token you provided failed verification process. Most likely, your session is expired. Try signin in again.")]
     InvalidToken { #[from] source: jsonwebtoken::errors::Error }
 }
 
 impl IntoResponse for AuthenticationError {
     fn into_response(self) -> Response {
-        // TODO: Add logging, as auth errors may be sign of broken system or malicouse attocks
+        tracing::error!("Authentication error: {:?}", self);
         use AuthenticationError::*;
         let code = match self {
             InvalidAuthHeaders { .. } => StatusCode::UNAUTHORIZED,
             InvalidToken { .. } => StatusCode::UNAUTHORIZED
         };
-        (code, self.to_string()).into_response()
+        (code, Json(CommonErrorResponse {
+            message: self.to_string(),
+            developer_message: format!("{self:?}"),
+        })).into_response()
     }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum AuthenticationFlowError {
-    #[error("There was a problem sending requests to the identity servier: {source} {source:?}")]
+    #[error("There was a problem sending requests to the identity servier.")]
     IdentityServerRequestFailure { #[from] source: reqwest::Error, },
-    #[error("Identity server responded with an error: {body:?}")]
+    #[error("Identity server responded with an error.")]
     IdentityServerBadResponseStatus { body: String },
-    #[error("Identity server sent a response that can't be parsed: {source:?}")]
+    #[error("Identity server sent a response that can't be parsed.")]
     MalformedIdentityServerResponse { #[from] source: ParserError, },
     #[error("Identity server sent a response that doesn't contain required data: {reason}")]
     UnexpectedIdentityServerResponseSchema { reason: &'static str },
     #[error("Server failed to generate a JWT: {source:?}")]
     JsonWebTokenFailure { #[from] source: jsonwebtoken::errors::Error, },
-    #[error("Server failed at accessing its datadource: {source}")]
+    #[error("Server failed to access its datasource.")]
     DatasourceAccessFailure { #[from] source: RepositoryError, },
-    #[error("There was a problem connecting to Redis datasource, authentication can't be completed: {source}")]
+    #[error("There was a problem connecting to Redis datasource, authentication can't be completed.")]
     RedisConnectionIssue { #[from] source: redis::RedisError, },
-    #[error("Request is invalid:\n{source}")]
+    #[error("Request validation failed. ")]
     RequestValidationFailed { #[from] source: validator::ValidationErrors, },
     #[error("Server has a problem hashing this password to store it in its database.")]
     PasswordHashingFailure,
@@ -94,7 +104,6 @@ pub enum AuthenticationFlowError {
     UserAlreadyExists,
     #[error("The email and password combination you entered didn't match our records. Please check your credentials and try again.")]
     InvalidCredentials,
-    
 }
 
 impl IntoResponse for AuthenticationFlowError {
@@ -109,7 +118,11 @@ impl IntoResponse for AuthenticationFlowError {
             InvalidCredentials => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
-        (code, self.to_string()).into_response()
+
+        (code, Json(CommonErrorResponse {
+            message: self.to_string(),
+            developer_message: format!("{self:?}"),
+        })).into_response()
     }
 }
 

@@ -188,7 +188,7 @@ async fn post_auth_google(
         None => {
             if state
                 .repository
-                .find_user_by_login_method(LoginMethodType::GoogleOauth, &token_claims.sub)?
+                .find_user_by_email(&token_claims.email)?
                 .is_some()
             {
                 Err(AuthenticationFlowError::NoSuchLoginMethodForUser)
