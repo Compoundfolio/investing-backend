@@ -128,7 +128,7 @@ impl IntoResponse for AuthenticationFlowError {
             _ => None
         };
         let details = if code == StatusCode::INTERNAL_SERVER_ERROR && details.is_none() {
-            Some(format!("Please, try again later, and if the problem persists, contact our technical support."))
+            Some("Please, try again later, and if the problem persists, contact our technical support.".to_string())
         } else {
             None
         };

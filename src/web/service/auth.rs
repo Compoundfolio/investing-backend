@@ -22,7 +22,7 @@ impl axum::extract::FromRequestParts<Arc<ApplicationState>> for AuthClaims
         let TypedHeader(Authorization(bearer)) =
             TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, &state)
                 .await?;
-        let claims = verify_jwt(&bearer.token(), &state.settings.auth.server_secret)?;
+        let claims = verify_jwt(bearer.token(), &state.settings.auth.server_secret)?;
         Ok(claims)
     }
 }
