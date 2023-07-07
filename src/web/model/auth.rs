@@ -66,6 +66,7 @@ impl IntoResponse for AuthenticationError {
         };
         (code, Json(CommonErrorResponse {
             message: self.to_string(),
+            details: None,
             developer_message: format!("{self:?}"),
         })).into_response()
     }
@@ -79,30 +80,27 @@ pub enum AuthenticationFlowError {
     IdentityServerBadResponseStatus { body: String },
     #[error("Identity server sent a response that can't be parsed.")]
     MalformedIdentityServerResponse { #[from] source: ParserError, },
-    #[error("Identity server sent a response that doesn't contain required data: {reason}")]
+    #[error("Identity server sent a response that doesn't contain required data.")]
     UnexpectedIdentityServerResponseSchema { reason: &'static str },
-    #[error("Server failed to generate a JWT: {source:?}")]
+    #[error("Server failed to generate your access token.")]
     JsonWebTokenFailure { #[from] source: jsonwebtoken::errors::Error, },
-    #[error("Server failed to access its datasource.")]
+    #[error("Server is currently experiencing database connectivity issues.")]
     DatasourceAccessFailure { #[from] source: RepositoryError, },
     #[error("There was a problem connecting to Redis datasource, authentication can't be completed.")]
     RedisConnectionIssue { #[from] source: redis::RedisError, },
-    #[error("Request validation failed. ")]
+    #[error("Request validation failed. Please check information you supplied for the request.")]
     RequestValidationFailed { #[from] source: validator::ValidationErrors, },
-    #[error("Server has a problem hashing this password to store it in its database.")]
+    #[error("Server has a problem hashing this password to store it in our database.")]
     PasswordHashingFailure,
-    #[error("Server is readin unexpected data from its database. Please, try again later, and if the problem\
-             persists, contact our technical support.")]
+    #[error("Server is reading unexpected data from its database.")]
     IllegalStateException,
-    #[error("This user already exists, but didn't authorize this login method to be used for authentication.\
-             Please, add this login method to your account when you are authorized.")]
+    #[error("This user already exists, but didn't authorize this login method to be used for authentication.")]
     NoSuchLoginMethodForUser,
-    #[error("State token you provided is either expired or invalid. Request a new state token from server before\
-             starting the OpenID authentication flow.")]
+    #[error("State token you provided is either expired or invalid. ")]
     InvalidStateToken,
     #[error("This user already exists and can't be registered with a new password. Consider signing in.")]
     UserAlreadyExists,
-    #[error("The email and password combination you entered didn't match our records. Please check your credentials and try again.")]
+    #[error("The email and password combination not found.")]
     InvalidCredentials,
 }
 
@@ -118,9 +116,25 @@ impl IntoResponse for AuthenticationFlowError {
             InvalidCredentials => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
-
+        let details = match self {
+            InvalidCredentials =>
+                Some("Please check your credentials and try once again."),
+            InvalidStateToken => 
+                Some("This usually happens when you interrupt an authentication flow. \
+                Please, try authenticating again."),
+            IllegalStateException => 
+                Some("This happened because you used an other flow to sign up. \
+                Please, add this flow to your account when you are authorized."),
+            _ => None
+        };
+        let details = if code == StatusCode::INTERNAL_SERVER_ERROR && details.is_none() {
+            Some(format!("Please, try again later, and if the problem persists, contact our technical support."))
+        } else {
+            None
+        };
         (code, Json(CommonErrorResponse {
             message: self.to_string(),
+            details,
             developer_message: format!("{self:?}"),
         })).into_response()
     }

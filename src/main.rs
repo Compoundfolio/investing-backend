@@ -10,7 +10,6 @@ use crate::web::routes::graphql::QueryRoot;
 
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use axum::{extract::Extension, routing::get_service, Router};
-use axum_server::tls_openssl::OpenSSLConfig;
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
@@ -44,7 +43,6 @@ async fn main() {
     let settings =
         Settings::from_config().expect("Expected to read configuration file");
 
-    let use_ssl = settings.web.use_ssl;
     let port = settings.web.port;
 
     let state = ApplicationState {
@@ -69,21 +67,11 @@ async fn main() {
 
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
-    tracing::info!("listening on {}", addr);
-
-    if use_ssl {
-        let ssl_config = OpenSSLConfig::from_pem_file("./certs/tls.crt", "./certs/tls.key")
-            .expect("Could not build open sslf config from pem files");
-        axum_server::bind_openssl(addr, ssl_config)
-            .serve(app.into_make_service())
-            .await
-            .expect("Should have started the https server");
-    } else { 
-        axum_server::bind(addr)
-            .serve(app.into_make_service())
-            .await
-            .expect("Should have started the http server");
-    };
+    tracing::info!("Starting server on on http://{}", addr);
+    axum_server::bind(addr)
+        .serve(app.into_make_service())
+        .await
+        .expect("Should have started the http server");
 }
 
 pub fn establish_sql_connection(sql_url: &str, run_migrations: bool) -> Pool<ConnectionManager<PgConnection>> {

@@ -1,26 +1,22 @@
 
 use std::sync::Arc;
-
 use argon2::{
     password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
-
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::{get, post};
 use axum::{Json, Router};
-
-
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use redis::Commands;
 use serde::{Deserialize};
-
 use validator::Validate;
+use tracing::warn;
 
-use crate::datasource::diesel::enums::LoginMethodType;
+use crate::datasource::diesel::{enums::LoginMethodType, repository::RepositoryError};
 use crate::datasource::diesel::model::auth::{AppUser, InsertAppUser, InsertLoginMethod};
 use crate::web::model::auth::*;
 use crate::ApplicationState;
@@ -184,14 +180,12 @@ async fn post_auth_google(
         .repository
         .find_user_by_login_method(LoginMethodType::GoogleOauth, &token_claims.sub)?
     {
-        Some(u) => Ok(u),
+        Some(u) => Ok::<AppUser,RepositoryError>(u),
         None => {
-            if state
-                .repository
-                .find_user_by_email(&token_claims.email)?
-                .is_some()
-            {
-                Err(AuthenticationFlowError::NoSuchLoginMethodForUser)
+            let existing = state.repository.find_user_by_email(&token_claims.email)?;
+            if let Some(app_user) = existing {
+                warn!("User that had other login method signed up through OpenID. Accounts merged.");
+                Ok(app_user)
             } else {
                 let created_app_user = state.repository.create_user(&InsertAppUser {
                     email: &token_claims.email,

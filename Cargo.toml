@@ -11,7 +11,7 @@ async-graphql = "5.0.8"
 async-graphql-axum = "5.0.8"
 axum = { version = "0.6.18", features = ["headers", "tracing"] }
 axum-macros = "0.3.7"
-axum-server = { version = "0.5.1", features = ["tls-openssl"] }
+axum-server = { version = "0.5.1" }
 chrono = { version = "0.4.24", features = ["serde"] }
 config = { version = "0.13.3", features = ["toml"] }
 diesel = { version = "2.1.0", features = ["postgres", "r2d2", "uuid"] }

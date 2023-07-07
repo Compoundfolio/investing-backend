@@ -12,7 +12,6 @@ pub struct Settings {
 
 #[derive(Debug, Deserialize)]
 pub struct WebSettings {
-    pub use_ssl: bool,
     pub port: u16,
 }
 
