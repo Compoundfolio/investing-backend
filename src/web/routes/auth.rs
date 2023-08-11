@@ -1,5 +1,3 @@
-
-use std::sync::Arc;
 use argon2::{
     password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
@@ -12,12 +10,13 @@ use axum::{Json, Router};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use redis::Commands;
-use serde::{Deserialize};
-use validator::Validate;
+use serde::Deserialize;
+use std::sync::Arc;
 use tracing::warn;
+use validator::Validate;
 
-use crate::datasource::diesel::{enums::LoginMethodType, repository::RepositoryError};
 use crate::datasource::diesel::model::auth::{AppUser, InsertAppUser, InsertLoginMethod};
+use crate::datasource::diesel::{enums::LoginMethodType, repository::RepositoryError};
 use crate::web::model::auth::*;
 use crate::ApplicationState;
 
@@ -31,13 +30,14 @@ pub fn routes() -> Router<Arc<ApplicationState>> {
         .route("/auth/google", post(post_auth_google))
 }
 
-async fn get_state_token(State(app_state): State<Arc<ApplicationState>>) -> Result<(StatusCode, Json<StateTokenResponse>), AuthenticationFlowError> {
+async fn get_state_token(
+    State(app_state): State<Arc<ApplicationState>>,
+) -> Result<(StatusCode, Json<StateTokenResponse>), AuthenticationFlowError> {
     let state_token: String = thread_rng()
         .sample_iter(&Alphanumeric)
         .take(30)
         .map(char::from)
         .collect();
-
 
     let mut connection = app_state.redis.get_connection()?;
     let state_token_key: String = format!("{}:{}", STATE_TOKEN_REDIS_PREFIX, state_token);
@@ -180,7 +180,7 @@ async fn post_auth_google(
         .repository
         .find_user_by_login_method(LoginMethodType::GoogleOauth, &token_claims.sub)?
     {
-        Some(u) => Ok::<AppUser,RepositoryError>(u),
+        Some(u) => Ok::<AppUser, RepositoryError>(u),
         None => {
             let existing = state.repository.find_user_by_email(&token_claims.email)?;
             if let Some(app_user) = existing {

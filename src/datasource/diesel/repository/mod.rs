@@ -1,7 +1,5 @@
 pub mod auth;
 
-
-
 use r2d2;
 use thiserror::Error;
 

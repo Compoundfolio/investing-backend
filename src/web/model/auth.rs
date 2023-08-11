@@ -1,7 +1,7 @@
-use axum::Json;
 use axum::extract::rejection::TypedHeaderRejection;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use axum::Json;
 use jsonwebtoken_google::ParserError;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
@@ -62,7 +62,7 @@ impl IntoResponse for AuthenticationError {
         use AuthenticationError::*;
         let code = match self {
             InvalidAuthHeaders { .. } => StatusCode::UNAUTHORIZED,
-            InvalidToken { .. } => StatusCode::UNAUTHORIZED
+            InvalidToken { .. } => StatusCode::UNAUTHORIZED,
         };
         (code, Json(CommonErrorResponse {
             message: self.to_string(),

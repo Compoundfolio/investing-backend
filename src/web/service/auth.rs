@@ -1,10 +1,17 @@
 use std::sync::Arc;
 
-use axum::{http::request::Parts, TypedHeader, headers::{Authorization, authorization::Bearer}};
+use axum::{
+    headers::{authorization::Bearer, Authorization},
+    http::request::Parts,
+    TypedHeader,
+};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{datasource::diesel::model::auth::AppUser, web::model::auth::AuthenticationError, ApplicationState};
+use crate::{
+    datasource::diesel::model::auth::AppUser, web::model::auth::AuthenticationError,
+    ApplicationState,
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct AuthClaims {
@@ -15,13 +22,14 @@ pub struct AuthClaims {
 }
 
 #[axum::async_trait]
-impl axum::extract::FromRequestParts<Arc<ApplicationState>> for AuthClaims 
-{
+impl axum::extract::FromRequestParts<Arc<ApplicationState>> for AuthClaims {
     type Rejection = AuthenticationError;
-    async fn from_request_parts(parts: &mut Parts, state: &Arc<ApplicationState>) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &Arc<ApplicationState>,
+    ) -> Result<Self, Self::Rejection> {
         let TypedHeader(Authorization(bearer)) =
-            TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, &state)
-                .await?;
+            TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, &state).await?;
         let claims = verify_jwt(bearer.token(), &state.settings.auth.server_secret)?;
         Ok(claims)
     }

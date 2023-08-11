@@ -1,6 +1,6 @@
 use std::env;
 
-use config::{Config, ConfigError, File, Environment};
+use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -33,7 +33,7 @@ pub struct AuthProviderSettings {
 pub struct Datasources {
     pub sql_url: String,
     pub redis_url: String,
-    pub run_migrations: bool
+    pub run_migrations: bool,
 }
 
 impl Settings {
