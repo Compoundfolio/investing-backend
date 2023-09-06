@@ -76,13 +76,8 @@ enum ExanteReportParsingError {
     Csv { #[from] source: csv::Error }
 }
 
-struct RecordTypeWithHeader {
-    record_type: ReportRecordType,
-    header: csv::StringRecord,
-}
-
 #[allow(unused)]
-async fn parse_exante_report<R: AsyncRead + Unpin>(
+async fn parse_report<R: AsyncRead + Unpin>(
     reader: R,
 ) -> Result<Report, ExanteReportParsingError> {
     let original_buf_read = BufReader::new(reader);
@@ -96,24 +91,21 @@ async fn parse_exante_report<R: AsyncRead + Unpin>(
         let split_line = split_csv_line_to_fields(&line);
         if let Some(record_type) = ReportRecordType::get_suitable_type_for_header(&split_line) {
             let header = csv::StringRecord::from(split_line);
-            current_record_type = Some(RecordTypeWithHeader {
-                record_type,
-                header,
-            });
+            current_record_type = Some((record_type, header));
         } else {
             let current_record_type = current_record_type
                 .as_ref()
                 .ok_or(ExanteReportParsingError::UnknownHeader)?;
             let record = csv::StringRecord::from(split_line);
-            match current_record_type.record_type {
+            match current_record_type.0 {
                 ReportRecordType::TradeOperation => {
                     let report_item: TradeOperation =
-                        record.deserialize(Some(&current_record_type.header))?;
+                        record.deserialize(Some(&current_record_type.1))?;
                     trade_operations.push(report_item);
                 }
                 ReportRecordType::Transaction => {
                     let report_item: Transaction =
-                        record.deserialize(Some(&current_record_type.header))?;
+                        record.deserialize(Some(&current_record_type.1))?;
                     transactions.push(report_item);
                 }
             }
@@ -138,7 +130,7 @@ mod test {
         d.push("testdata/exante_empty_report.csv");
         let file = File::open(d).await.unwrap();
 
-        let report = parse_exante_report(file).await.unwrap();
+        let report = parse_report(file).await.unwrap();
         assert!(report.trade_operations.is_empty());
         assert!(report.transactions.is_empty());
     }
@@ -149,7 +141,7 @@ mod test {
         d.push("testdata/exante_small_report.csv");
         let file = File::open(d).await.unwrap();
 
-        let report = parse_exante_report(file).await.unwrap();
+        let report = parse_report(file).await.unwrap();
         assert_eq!(report.trade_operations.len(), 25);
         assert_eq!(report.transactions.len(), 131);
     }

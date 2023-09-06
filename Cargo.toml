@@ -19,7 +19,8 @@ csv-async = { version = "1.2.6", features = ["tokio"] }
 diesel = { version = "2.1.0", features = ["postgres", "r2d2", "uuid"] }
 diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 diesel_migrations = { version = "2.1.0", features = ["postgres"] }
-futures-util = { version = "0.3.28", features = ["futures-io", "tokio-io", "io"] }
+futures-util = "0.3.28"
+json = "0.12.4"
 jsonwebtoken = "8.3.0"
 jsonwebtoken-google = "0.1.6"
 oauth2 = "4.4.0"
@@ -36,6 +37,8 @@ serde-enum-str = "0.3.2"
 serde_json = "1.0.96"
 thiserror = "1.0.40"
 tokio = { version = "1.28.1", features = ["full"] }
+tokio-serde = { version = "0.8.0", features = ["serde", "json"] }
+tokio-util = { version = "0.7.8", features = ["compat", "futures-util"] }
 tower-http = { version = "0.4.0", features = ["fs","cors"] }
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
