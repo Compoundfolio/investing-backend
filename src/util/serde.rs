@@ -28,6 +28,7 @@ pub mod date_time_format {
     }
 }
 
+#[allow(unused)]
 pub fn deserialize_uuid_or_none<'de, D>(deserializer: D) -> Result<Option<Uuid>, D::Error>
 where
     D: Deserializer<'de>,

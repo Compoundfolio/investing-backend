@@ -1,2 +1,4 @@
-pub mod exante;
-pub mod freedomfinance;
+mod exante;
+mod freedomfinance;
+mod model;
+
