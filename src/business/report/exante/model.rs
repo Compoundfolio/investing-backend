@@ -1,5 +1,5 @@
-use chrono::{DateTime, Utc};
-use rust_decimal::Decimal;
+use chrono::NaiveDateTime;
+use bigdecimal::BigDecimal;
 use serde::Deserialize;
 use serde_enum_str::Deserialize_enum_str;
 use uuid::Uuid;
@@ -18,7 +18,7 @@ pub enum TradeOperationSide {
 #[derive(Deserialize)]
 pub struct TradeOperation {
     #[serde(rename = "Time", with = "date_time_format")]
-    pub timestamp: DateTime<Utc>,
+    pub timestamp: NaiveDateTime,
     #[serde(rename = "Account ID")]
     pub account_id: String,
     #[serde(rename = "Side")]
@@ -30,19 +30,19 @@ pub struct TradeOperation {
     #[serde(rename = "Type")]
     pub trade_operation_type: String, // like "STOCK"
     #[serde(rename = "Price")]
-    pub price: Decimal,
+    pub price: BigDecimal,
     #[serde(rename = "Currency")]
     pub currency: String,
     #[serde(rename = "Quantity")]
-    pub quantity: u32,
+    pub quantity: i32,
     #[serde(rename = "Commission")]
-    pub commission: Decimal,
+    pub commission: BigDecimal,
     #[serde(rename = "Commission Currency")]
     pub commission_currency: String,
     #[serde(rename = "P&L")]
-    pub pnl: Decimal,
+    pub pnl: BigDecimal,
     #[serde(rename = "Traded Volume")]
-    pub traded_volume: Decimal, // as a summ without commission
+    pub traded_volume: BigDecimal, // as a summ without commission
     #[serde(rename = "Order Id")]
     pub order_id: Uuid,
     #[serde(rename = "Order pos")]
@@ -84,13 +84,13 @@ pub struct Transaction {
     #[serde(rename = "Operation type")]
     pub operation_type: TransactionOperationType,
     #[serde(rename = "When", with = "date_time_format")]
-    pub timestamp: DateTime<Utc>,
+    pub timestamp: NaiveDateTime,
     #[serde(rename = "Sum")]
-    pub sum: Decimal,
+    pub sum: BigDecimal,
     #[serde(rename = "Asset")]
     pub asset: String, // always currency or ticker
     #[serde(rename = "EUR equivalent")]
-    pub eur_equivalent: Decimal,
+    pub eur_equivalent: BigDecimal,
     #[serde(rename = "Comment")]
     pub comment: String,
     #[serde(rename = "UUID")]

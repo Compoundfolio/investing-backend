@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
-use chrono::{DateTime, Utc};
-use rust_decimal::Decimal;
+use chrono::NaiveDateTime;
+use bigdecimal::BigDecimal;
 use serde::Deserialize;
 use serde_enum_str::Deserialize_enum_str;
 
@@ -48,18 +48,18 @@ pub enum CashInOutType {
 pub struct DetailedTrade {
     pub trade_id: u64,
     #[serde(with = "date_time_format")]
-    pub date: DateTime<Utc>,
+    pub date: NaiveDateTime,
     pub instr_nm: String,
     pub instr_kind: String,
     pub operation: TradeOperationSide,
     #[serde(rename = "p")]
-    pub price: Decimal,
+    pub price: BigDecimal,
     pub curr_c: String,
     #[serde(rename = "q")]
-    pub quantity: u32,
-    pub summ: Decimal,
+    pub quantity: i32,
+    pub summ: BigDecimal,
     pub order_id: String,
-    pub commission: Decimal,
+    pub commission: BigDecimal,
     pub commission_currency: String,
     pub comment: String,
     pub transaction_id: u64,
@@ -74,7 +74,7 @@ pub struct CashFlow {
     pub date: NaiveDate,
     pub account: String,
     pub sum: String,
-    pub amount: Decimal,
+    pub amount: BigDecimal,
     pub currency: String,
     pub type_id: String,
     pub comment: String,
@@ -84,11 +84,11 @@ pub struct CashFlow {
 pub struct CashInOut {
     pub id: u64,
     #[serde(with = "date_time_format")]
-    pub datetime: DateTime<Utc>,
+    pub datetime: NaiveDateTime,
     pub ticker: Option<String>,
-    pub amount: Decimal,
+    pub amount: BigDecimal,
     pub currency: String,
-    pub commission: Decimal,
+    pub commission: BigDecimal,
     pub commission_currency: Option<String>,
     #[serde(rename = "type")]
     pub operation_type: CashInOutType,

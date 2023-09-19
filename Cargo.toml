@@ -12,11 +12,12 @@ async-graphql-axum = "5.0.8"
 axum = { version = "0.6.18", features = ["headers", "tracing"] }
 axum-macros = "0.3.7"
 axum-server = { version = "0.5.1" }
+bigdecimal = { version = "0.4", features = ["serde"] }
 chrono = { version = "0.4.24", features = ["serde"] }
 config = { version = "0.13.3", features = ["toml"] }
 csv = "1.2.2"
 csv-async = { version = "1.2.6", features = ["tokio"] }
-diesel = { version = "2.1.0", features = ["postgres", "r2d2", "uuid"] }
+diesel = { version = "2.1.0", features = ["postgres", "r2d2", "uuid", "chrono", "serde_json"] }
 diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 diesel_migrations = { version = "2.1.0", features = ["postgres"] }
 futures-util = "0.3.28"
@@ -30,7 +31,6 @@ r2d2 = "0.8.10"
 rand = "0.8.5"
 redis = { version = "0.23.0", features = ["tokio-comp"] }
 reqwest = { version = "0.11.18", features = ["json", "native-tls"] }
-rust_decimal = "1.30.0"
 serde = { version = "1.0.163", features = ["derive"] }
 serde-aux = "4.2.0"
 serde-enum-str = "0.3.2"
