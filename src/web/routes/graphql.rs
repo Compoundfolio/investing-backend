@@ -9,9 +9,8 @@ use axum::response::{Html, IntoResponse};
 use axum::routing::get;
 use axum::{Extension, Router};
 
+use crate::auth::service::AuthClaims;
 use crate::web::model::graphql::Me;
-use crate::web::service;
-use crate::web::service::auth::AuthClaims;
 use crate::ApplicationState;
 
 pub fn routes() -> Router<Arc<ApplicationState>> {
@@ -24,7 +23,7 @@ async fn graphql_playground() -> impl IntoResponse {
     ))
 }
 
-type Claims = Option<service::auth::AuthClaims>;
+type Claims = Option<AuthClaims>;
 async fn graphql_handler(
     Extension(schema): Extension<ServiceSchema>,
     claims: Claims,

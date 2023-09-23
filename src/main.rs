@@ -1,14 +1,12 @@
 #![forbid(unsafe_code)]
 
+mod auth;
 mod business;
-mod datasource;
+mod database;
+mod portfolio;
 mod settings;
 mod util;
 mod web;
-
-use crate::datasource::diesel::repository::CommonRepository;
-use crate::settings::Settings;
-use crate::web::routes::graphql::QueryRoot;
 
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use axum::{extract::Extension, routing::get_service, Router};
@@ -24,6 +22,10 @@ use tracing::warn;
 
 use std::net::SocketAddr;
 use std::sync::Arc;
+
+use crate::settings::Settings;
+use crate::web::routes::graphql::QueryRoot;
+use crate::database::CommonRepository;
 
 pub struct ApplicationState {
     pub settings: Settings,
@@ -62,7 +64,7 @@ async fn main() {
     };
 
     let app = Router::new()
-        .merge(crate::web::routes::auth::routes())
+        .merge(crate::auth::routes::routes())
         .merge(crate::web::routes::graphql::routes())
         .route(
             "/graphql/sdl",

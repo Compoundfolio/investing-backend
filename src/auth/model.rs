@@ -6,9 +6,59 @@ use jsonwebtoken_google::ParserError;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 use validator::ValidationError;
+use diesel::prelude::*;
+use uuid::Uuid;
 
-use crate::datasource::diesel::repository::RepositoryError;
+use crate::database::schema;
+use crate::database::RepositoryError;
 use crate::web::model::CommonErrorResponse;
+
+// --- orm
+
+#[derive(diesel_derive_enum::DbEnum, Debug, Deserialize)]
+#[ExistingTypePath = "crate::database::schema::sql_types::LoginMethodTypeType"]
+pub enum LoginMethodType {
+    GoogleOauth,
+    Password,
+}
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = schema::app_user)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct AppUser {
+    pub id: Uuid,
+    pub email: String,
+}
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = schema::app_user_login_method)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct AppUserLoginMethod {
+    pub id: Uuid,
+    pub app_user_id: Uuid,
+    pub login_method_type: LoginMethodType,
+    pub subject_id: Option<String>,
+    pub password_hash: Option<String>,
+}
+
+#[derive(Deserialize, Insertable)]
+#[diesel(table_name = schema::app_user)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertAppUser<'a> {
+    pub email: &'a str,
+}
+
+#[derive(Deserialize, Insertable)]
+#[diesel(table_name = schema::app_user_login_method)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertLoginMethod<'a> {
+    pub app_user_id: Uuid,
+    pub login_method_type: LoginMethodType,
+    pub subject_id: Option<&'a str>,
+    pub password_hash: Option<&'a str>,
+}
+
+// --- web api
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -23,6 +73,7 @@ pub struct GoogleAuthRequest {
     pub code: String,
     pub redirect_uri: String,
 }
+
 
 #[derive(Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
@@ -47,6 +98,7 @@ pub struct AuthTokenResponse {
     pub expires_at: usize,
 }
 
+// --- web api errors
 
 #[derive(thiserror::Error, Debug)]
 pub enum AuthenticationError {

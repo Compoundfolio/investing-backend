@@ -39,6 +39,23 @@ diesel::table! {
 }
 
 diesel::table! {
+    portfolio (id) {
+        id -> Uuid,
+        app_user_id -> Uuid,
+        label -> Varchar,
+    }
+}
+
+diesel::table! {
+    report_upload (id) {
+        id -> Uuid,
+        portfolio_id -> Uuid,
+        label -> Varchar,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     use diesel::sql_types::*;
     use super::sql_types::OperationSourceType;
     use super::sql_types::TradeSideType;
@@ -46,7 +63,8 @@ diesel::table! {
 
     trade_operation (id) {
         id -> Uuid,
-        app_user_id -> Uuid,
+        portfolio_id -> Uuid,
+        report_upload_id -> Nullable<Uuid>,
         operation_source -> OperationSourceType,
         external_id -> Varchar,
         date_time -> Timestamp,
@@ -69,7 +87,7 @@ diesel::table! {
 
     transaction (id) {
         id -> Uuid,
-        app_user_id -> Uuid,
+        portfolio_id -> Uuid,
         operation_source -> OperationSourceType,
         external_id -> Varchar,
         date_time -> Timestamp,
@@ -82,12 +100,17 @@ diesel::table! {
 }
 
 diesel::joinable!(app_user_login_method -> app_user (app_user_id));
-diesel::joinable!(trade_operation -> app_user (app_user_id));
-diesel::joinable!(transaction -> app_user (app_user_id));
+diesel::joinable!(portfolio -> app_user (app_user_id));
+diesel::joinable!(report_upload -> portfolio (portfolio_id));
+diesel::joinable!(trade_operation -> portfolio (portfolio_id));
+diesel::joinable!(trade_operation -> report_upload (report_upload_id));
+diesel::joinable!(transaction -> portfolio (portfolio_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     app_user,
     app_user_login_method,
+    portfolio,
+    report_upload,
     trade_operation,
     transaction,
 );

@@ -1,10 +1,8 @@
-pub mod auth;
+pub mod schema;
 
 use r2d2;
 use thiserror::Error;
-
 use diesel::pg::PgConnection;
-
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 
@@ -23,7 +21,7 @@ pub enum RepositoryError {
 }
 
 pub struct CommonRepository {
-    pool: Pool<ConnectionManager<PgConnection>>,
+    pub pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl CommonRepository {

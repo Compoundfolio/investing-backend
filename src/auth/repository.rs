@@ -1,9 +1,8 @@
-use super::{
-    super::{enums::LoginMethodType, model::auth::*, schema},
-    *,
-};
-
 use diesel::{insert_into, prelude::*};
+
+use crate::database::{schema, CommonRepository, RepositoryError};
+
+use super::model::{LoginMethodType, AppUser, AppUserLoginMethod, InsertLoginMethod, InsertAppUser};
 
 impl CommonRepository {
     pub fn find_user_by_login_method(

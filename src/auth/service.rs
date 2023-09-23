@@ -8,10 +8,10 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{
-    datasource::diesel::model::auth::AppUser, web::model::auth::AuthenticationError,
-    ApplicationState,
-};
+use crate::ApplicationState;
+
+use super::model::{AuthenticationError, AppUser};
+
 
 #[derive(Serialize, Deserialize)]
 pub struct AuthClaims {

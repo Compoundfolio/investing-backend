@@ -15,10 +15,8 @@ use std::sync::Arc;
 use tracing::warn;
 use validator::Validate;
 
-use crate::datasource::diesel::model::auth::{AppUser, InsertAppUser, InsertLoginMethod};
-use crate::datasource::diesel::{enums::LoginMethodType, repository::RepositoryError};
-use crate::web::model::auth::*;
-use crate::ApplicationState;
+use super::model::{AppUser, InsertAppUser, InsertLoginMethod, LoginMethodType, StateTokenResponse, AuthenticationFlowError, SignupAuthRequest, AuthTokenResponse, SigninAuthRequest, GoogleAuthRequest};
+use crate::{ApplicationState, database::RepositoryError};
 
 const STATE_TOKEN_REDIS_PREFIX: &str = "STATE_TOKEN";
 
@@ -79,7 +77,7 @@ async fn post_auth_signup(
         password_hash: Some(&hashed_password),
     })?;
     let (token, expires_at) =
-        crate::web::service::auth::generate_jwt(created_user, &state.settings.auth.server_secret)?;
+        super::service::generate_jwt(created_user, &state.settings.auth.server_secret)?;
     let response = AuthTokenResponse { token, expires_at };
     Ok((StatusCode::OK, Json(response)))
 }
@@ -109,7 +107,7 @@ async fn post_auth_signin(
         .map_err(|_| AuthenticationFlowError::InvalidCredentials)?;
 
     let (token, expires_at) =
-        crate::web::service::auth::generate_jwt(app_user, &state.settings.auth.server_secret)?;
+        super::service::generate_jwt(app_user, &state.settings.auth.server_secret)?;
     let response = AuthTokenResponse { token, expires_at };
     Ok((StatusCode::OK, Json(response)))
 }
@@ -201,7 +199,7 @@ async fn post_auth_google(
         }
     }?;
     let (token, expires_at) =
-        crate::web::service::auth::generate_jwt(app_user, &state.settings.auth.server_secret)?;
+        super::service::generate_jwt(app_user, &state.settings.auth.server_secret)?;
     let response = AuthTokenResponse { token, expires_at };
     Ok((StatusCode::OK, Json(response)))
 }

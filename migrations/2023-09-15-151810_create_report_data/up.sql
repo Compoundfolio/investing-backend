@@ -5,9 +5,23 @@ CREATE TYPE custom_money AS (
     currecy VARCHAR(3)
 );
 
-CREATE TABLE trade_operation (
+CREATE TABLE portfolio (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     app_user_id UUID NOT NULL REFERENCES app_user (id),
+    label VARCHAR NOT NULL DEFAULT ''
+);
+
+CREATE TABLE report_upload (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    portfolio_id UUID NOT NULL REFERENCES portfolio (id),
+    label VARCHAR NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE trade_operation (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    portfolio_id UUID NOT NULL REFERENCES portfolio (id),
+    report_upload_id UUID NULL REFERENCES report_upload (id),
     operation_source operation_source_type NOT NULL,
     external_id VARCHAR NOT NULL,
     date_time TIMESTAMP NOT NULL,
@@ -24,7 +38,7 @@ CREATE TABLE trade_operation (
 
 CREATE TABLE transaction (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    app_user_id UUID NOT NULL REFERENCES app_user (id),
+    portfolio_id UUID NOT NULL REFERENCES portfolio (id),
     operation_source operation_source_type NOT NULL,
     external_id VARCHAR NOT NULL,
     date_time TIMESTAMP NOT NULL,
@@ -37,3 +51,4 @@ CREATE TABLE transaction (
 
 CREATE UNIQUE INDEX ON trade_operation (operation_source, external_id);
 CREATE UNIQUE INDEX ON transaction (operation_source, external_id);
+
