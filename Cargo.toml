@@ -10,21 +10,17 @@ argon2 = "0.5.0"
 async-graphql = { version = "5.0.8", features = ["unblock"] }
 async-graphql-axum = "5.0.8"
 axum = { version = "0.6.18", features = ["headers", "tracing"] }
-axum-macros = "0.3.7"
 axum-server = { version = "0.5.1" }
 bigdecimal = { version = "0.4", features = ["serde"] }
 chrono = { version = "0.4.24", features = ["serde"] }
 config = { version = "0.13.3", features = ["toml"] }
 csv = "1.2.2"
-csv-async = { version = "1.2.6", features = ["tokio"] }
 diesel = { version = "2.1.0", features = ["postgres", "r2d2", "uuid", "chrono", "serde_json"] }
 diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 diesel_migrations = { version = "2.1.0", features = ["postgres"] }
 futures-util = "0.3.28"
-json = "0.12.4"
 jsonwebtoken = "8.3.0"
 jsonwebtoken-google = "0.1.6"
-oauth2 = "4.4.0"
 openssl = "0.10.52"
 passwords = "3.1.13"
 r2d2 = "0.8.10"
@@ -37,7 +33,6 @@ serde-enum-str = "0.3.2"
 serde_json = "1.0.96"
 thiserror = "1.0.40"
 tokio = { version = "1.28.1", features = ["full"] }
-tokio-serde = { version = "0.8.0", features = ["serde", "json"] }
 tokio-util = { version = "0.7.8", features = ["compat", "futures-util"] }
 tower-http = { version = "0.4.0", features = ["fs","cors"] }
 tracing = "0.1.37"
