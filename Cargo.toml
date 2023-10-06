@@ -1,14 +1,14 @@
 [package]
 name = "investing-backend-rs"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 argon2 = "0.5.0"
-async-graphql = { version = "5.0.8", features = ["unblock"] }
-async-graphql-axum = "5.0.8"
+async-graphql = { version = "6.0.7", features = ["unblock","uuid"] }
+async-graphql-axum = "6.0.7"
 axum = { version = "0.6.18", features = ["headers", "tracing"] }
 axum-server = { version = "0.5.1" }
 bigdecimal = { version = "0.4", features = ["serde"] }

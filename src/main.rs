@@ -8,7 +8,7 @@ mod settings;
 mod util;
 mod web;
 
-use async_graphql::{EmptyMutation, EmptySubscription, Schema};
+use async_graphql::{EmptySubscription, Schema};
 use axum::{extract::Extension, routing::get_service, Router};
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
@@ -24,7 +24,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use crate::settings::Settings;
-use crate::web::routes::graphql::QueryRoot;
+use crate::web::routes::graphql::{QueryRoot,MutationRoot};
 use crate::database::CommonRepository;
 
 pub struct ApplicationState {
@@ -41,7 +41,7 @@ async fn main() {
         .with_max_level(tracing::Level::INFO)
         .init();
 
-    let graphql_schema = Schema::build(QueryRoot, EmptyMutation, EmptySubscription).finish();
+    let graphql_schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish();
     let graphql_schema_sdl = graphql_schema.sdl();
     let cors = CorsLayer::new()
         .allow_methods(Any)

@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::database::schema;
 use crate::database::RepositoryError;
-use crate::web::model::CommonErrorResponse;
+use crate::web::CommonErrorResponse;
 
 // --- orm
 

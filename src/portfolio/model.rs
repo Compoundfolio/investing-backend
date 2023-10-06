@@ -1,11 +1,21 @@
 use bigdecimal::BigDecimal;
 use chrono::NaiveDateTime;
-use diesel::{Insertable, expression::AsExpression, deserialize::FromSqlRow};
+use diesel::{Insertable, expression::AsExpression, deserialize::FromSqlRow, Selectable, Queryable};
 use serde::{Deserialize, Serialize};
 use serde_enum_str::{Deserialize_enum_str,Serialize_enum_str};
 use uuid::Uuid;
 
 use crate::database::schema;
+
+#[derive(Deserialize, Queryable, Selectable)]
+#[diesel(table_name = schema::portfolio )]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct Portfolio {
+    pub id: Uuid,
+    pub label: String
+}
+
+// --- transactions and operations
 
 #[derive(Deserialize_enum_str, Serialize_enum_str)]
 #[derive(diesel_derive_enum::DbEnum, Debug)]
@@ -89,4 +99,12 @@ pub struct InsertTradeOperation {
     pub portfolio_id: Uuid,
     #[diesel(embed)]
     pub trade_operation: AbstractTradeOperation
+}
+
+#[derive(Deserialize, Insertable)]
+#[diesel(table_name = schema::portfolio )]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertPortfolio<'a> {
+    pub app_user_id: Uuid,
+    pub label: &'a str
 }

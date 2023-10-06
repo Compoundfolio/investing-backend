@@ -8,7 +8,7 @@ CREATE TYPE custom_money AS (
 CREATE TABLE portfolio (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     app_user_id UUID NOT NULL REFERENCES app_user (id),
-    label VARCHAR NOT NULL DEFAULT ''
+    label VARCHAR NOT NULL,
 );
 
 CREATE TABLE report_upload (
