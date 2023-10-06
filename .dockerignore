@@ -1,4 +1,5 @@
 /target
+pgdata
 /.git
 /.github
 /docker-compose.yml
