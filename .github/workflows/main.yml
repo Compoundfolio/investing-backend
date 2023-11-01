@@ -11,6 +11,7 @@ permissions:
   
 env:
   APP_NAME: investing-backend-rs
+  DEPLOY_ENV: prod
 
 jobs:
   deploy:
@@ -24,7 +25,7 @@ jobs:
         env:
           CONFIGURATION_PASSWORD: ${{ secrets.CONFIGURATION_PASSWORD }}
       - name: Build image
-        run: docker build -t $APP_NAME .
+        run: docker build --build-arg RUN_MODE=${DEPLOY_ENV} -t $APP_NAME .
       - name: Save image
         run: docker save -o $APP_NAME.tar "${APP_NAME}:latest" # TODO: tag
       - name: Set up SSH keys
@@ -33,11 +34,11 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
       - name: Upload image to server
-        run: rsync -avz $APP_NAME.tar docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/prod/backend/
+        run: rsync -avz $APP_NAME.tar docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/${DEPLOY_ENV}/backend/
       - name: Start the backend
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -o SendEnv=DATABASE_PASSWORD <<EOF
-              cd ~/backend
+              cd ~/${DEPLOY_ENV}/backend
               docker-compose --profile deployed down
               docker load -i $APP_NAME.tar
               docker-compose --profile deployed up -d --no-color
