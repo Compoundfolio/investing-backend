@@ -22,6 +22,7 @@ diesel::table! {
     app_user (id) {
         id -> Uuid,
         email -> Varchar,
+        created_at -> Timestamp,
     }
 }
 

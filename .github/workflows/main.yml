@@ -33,7 +33,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
       - name: Upload image to server
-        run: rsync -avz $APP_NAME.tar docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/backend/
+        run: rsync -avz $APP_NAME.tar docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/prod/backend/
       - name: Start the backend
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -o SendEnv=DATABASE_PASSWORD <<EOF

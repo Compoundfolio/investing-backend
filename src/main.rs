@@ -49,6 +49,8 @@ async fn main() {
         .allow_headers(Any);
 
     let settings = Settings::from_config().expect("Expected to read configuration file");
+    tracing::info!("Run mode: {}", settings.run_mode);
+
 
     let port = settings.web.port;
 
