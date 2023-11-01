@@ -2,6 +2,7 @@ use axum::extract::rejection::TypedHeaderRejection;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
+use chrono::NaiveDateTime;
 use jsonwebtoken_google::ParserError;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
@@ -28,6 +29,7 @@ pub enum LoginMethodType {
 pub struct AppUser {
     pub id: Uuid,
     pub email: String,
+    pub created_at: NaiveDateTime
 }
 
 #[derive(Queryable, Selectable)]
