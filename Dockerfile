@@ -3,7 +3,7 @@ WORKDIR /usr/src/investing-backend-rs
 COPY . .
 RUN cargo install --path . 
 
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 ARG RUN_MODE=prod
 WORKDIR /opt/investing-backend-rs
 RUN apt-get update && apt-get install -y postgresql-client ca-certificates
