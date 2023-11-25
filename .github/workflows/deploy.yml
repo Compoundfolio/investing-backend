@@ -1,4 +1,4 @@
-name: 'Deploy (Reusable)'
+name: 'Deploy (SSH)'
 
 # **What it does**: Takes the prepared application and deploys it to a specified environment
 # **Why we have it**: To reduce code duplication across very similar deployemnt process
@@ -23,18 +23,15 @@ permissions:
   
 jobs:
   deploy:
-    name: deploy ${{ inputs.env_name }}
+    name: SSH deploy
     runs-on: ubuntu-latest
     environment: ${{ inputs.env_name }}
     steps:
-      - name: Download the Docker image
+      - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
-          name: docker-image
-      - name: Download the Docker-compose file
-        uses: actions/download-artifact@v3
-        with:
-          name: docker-compose
+          name: image-with-configs
+                
       - name: Set up SSH keys
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
