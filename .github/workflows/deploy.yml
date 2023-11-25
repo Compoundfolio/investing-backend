@@ -30,6 +30,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: docker-image
+      - name: Download the Docker-compose file
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-compose
       - name: Set up SSH keys
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
