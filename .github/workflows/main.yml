@@ -9,15 +9,13 @@ on:
 permissions:
   contents: read
   
-env:
-  MODULE_NAME: 'investing-backend-rs'
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    outputs:
-      module_name: ${{ steps.outputting.outputs.module_name }}
+    env:
+      MODULE_NAME: 'investing-backend-rs'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -29,29 +27,31 @@ jobs:
         run: docker build -t $MODULE_NAME .
       - name: Save image
         run: docker save -o $MODULE_NAME.tar "${MODULE_NAME}:latest" # TODO: tag
-      - name: Upload math result for job 1
+      - name: Save image as artifact
         uses: actions/upload-artifact@v3
         with:
           name: docker-image
           path: ${{ env.MODULE_NAME }}.tar
-      - name: Store output for deployment
-        id: outputting
-        run: echo "module_name=$MODULE_NAME" >> "$GITHUB_OUTPUT"
+      - name: Save the compose file as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-compose
+          path: docker-compose.yml
 
   deploy-dev:
-    name: Deploy Dev
+    name: Deploy to dev
     needs: build
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
-      module_name: ${{ needs.vars.outputs.module_name }}
+      module_name: 'investing-backend-rs'
       env_name: dev
 
   deploy-prod:
-    name: Deploy Prod
+    name: Deploy to prod
     needs: build
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
-      module_name: ${{ needs.vars.outputs.module_name }}
+      module_name: 'investing-backend-rs'
       env_name: prod

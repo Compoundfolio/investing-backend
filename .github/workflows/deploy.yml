@@ -23,7 +23,6 @@ permissions:
   
 jobs:
   deploy:
-    name: Build and deploy Docker image
     runs-on: ubuntu-latest
     environment: ${{ inputs.env_name }}
     steps:
