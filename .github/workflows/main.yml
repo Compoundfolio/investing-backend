@@ -38,7 +38,7 @@ jobs:
             docker-compose.*yml
 
   deploy-dev:
-    name: Deploy to dev
+    name: To dev
     needs: build
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
@@ -47,7 +47,7 @@ jobs:
       env_name: dev
 
   deploy-prod:
-    name: Deploy to prod
+    name: To prod
     needs: deploy-dev
     uses: ./.github/workflows/deploy.yml
     secrets: inherit

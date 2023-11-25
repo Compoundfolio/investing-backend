@@ -39,7 +39,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
       - name: Upload image to server
         run: |
-          rsync -avz ${{ inputs.module_name}}.tar docker-compose.*yml \
+          rsync -avz ${{ inputs.module_name}}.tar docker-compose.yml docker-compose.${{ inputs.env_name}}.yml \
           ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/${{ inputs.env_name }}/${{ inputs.module_name }}/
       - name: Start the backend
         run: |
