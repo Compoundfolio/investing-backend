@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
-    pub run_mode: String,
+    pub env_name: String,
     pub web: WebSettings,
     pub auth: AuthSettings,
     pub datasource: Datasources,
@@ -39,11 +39,11 @@ pub struct Datasources {
 
 impl Settings {
     pub fn from_config() -> Result<Self, ConfigError> {
-        let run_mode = env::var("RUN_MODE").unwrap_or_else(|_| "local".into());
+        let env_name = env::var("ENV_NAME").unwrap_or_else(|_| "local".into());
         Config::builder()
-            .add_source(File::with_name(&format!("config.{run_mode}.toml")))
+            .add_source(File::with_name(&format!("config.{env_name}.toml")))
             .add_source(Environment::with_prefix("app").separator("__"))
-            .set_override("run_mode", run_mode)?
+            .set_override("env_name", env_name)?
             .build()?
             .try_deserialize()
     }

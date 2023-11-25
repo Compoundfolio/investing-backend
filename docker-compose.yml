@@ -4,7 +4,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - ENV_NAME=${ENV_NAME}
+      ENV_NAME: ${ENV_NAME}
     profiles: ["deployed"]
     depends_on:
       postgres:

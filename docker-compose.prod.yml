@@ -1,6 +1,8 @@
 name: investing-backend-rs-prod
 services:
   web:
+    environment:
+      ENV_NAME: prod
     ports:
       - "50110:8080"
   postgres:

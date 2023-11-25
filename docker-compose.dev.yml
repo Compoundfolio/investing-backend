@@ -1,6 +1,8 @@
 name: investing-backend-rs-dev
 services:
   web:
+    environment:
+      ENV_NAME: dev
     ports:
       - "30110:8080"
   postgres:
