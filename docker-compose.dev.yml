@@ -1,3 +1,4 @@
+name: investing-backend-rs-dev
 services:
   web:
     ports:
