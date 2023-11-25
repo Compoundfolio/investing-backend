@@ -1,0 +1,54 @@
+name: 'Deploy (Reusable)'
+
+# **What it does**: Takes the prepared application and deploys it to a specified environment
+# **Why we have it**: To reduce code duplication across very similar deployemnt process
+
+on:
+  workflow_call:
+    inputs:
+      module_name:
+        required: true
+        type: string
+      env_name:
+        required: true
+        type: string
+    secrets:
+      SSH_PRIVATE_KEY:
+        required: true
+      DATABASE_PASSWORD:
+        required: true
+      
+permissions:
+  contents: read
+  
+jobs:
+  deploy:
+    name: Build and deploy Docker image
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env_name }}
+    steps:
+      - name: Download the Docker image
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-image
+      - name: Set up SSH keys
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+      - name: Upload image to server
+        run: |
+          rsync -avz ${{ inputs.module_name}}.tar docker-compose.yml \
+          ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/${{ inputs.env_name }}/${{ inputs.module_name }}/
+      - name: Start the backend
+        run: |
+          echo "Deploying '${{ inputs.module_name }}' for '${{ inputs.env_name }}'"
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -o SendEnv=DATABASE_PASSWORD <<EOF
+              cd ~/${{ inputs.env_name }}/${{ inputs.module_name }}
+              export ENV_NAME=${{ inputs.env_name}}
+              docker-compose --profile deployed down
+              docker load -i ${{ inputs.module_name }}.tar
+              docker-compose --profile deployed up -d --no-color
+          EOF
+        env:
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}

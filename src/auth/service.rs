@@ -44,7 +44,7 @@ pub fn generate_jwt(
     let token = jsonwebtoken::encode(
         &jsonwebtoken::Header::default(),
         &AuthClaims {
-            iss: "compounfolio.com".to_owned(),
+            iss: "compoundfolio.com".to_owned(),
             sub: app_user.id,
             exp: expires_at,
             email: app_user.email,

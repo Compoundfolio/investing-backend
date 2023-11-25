@@ -1,4 +1,4 @@
-name: 'Deploy'
+name: 'Build'
 
 # **What it does**: Builds backend application and deploys it to our VPS
 # **Why we have it**: To automate CI/CD pipeline of our test environment
@@ -10,13 +10,14 @@ permissions:
   contents: read
   
 env:
-  APP_NAME: investing-backend-rs
-  DEPLOY_ENV: prod
+  MODULE_NAME: 'investing-backend-rs'
 
 jobs:
-  deploy:
-    name: Build and deploy Docker image
+  build:
+    name: Build
     runs-on: ubuntu-latest
+    outputs:
+      module_name: ${{ steps.outputting.outputs.module_name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,23 +26,32 @@ jobs:
         env:
           CONFIGURATION_PASSWORD: ${{ secrets.CONFIGURATION_PASSWORD }}
       - name: Build image
-        run: docker build --build-arg RUN_MODE=${DEPLOY_ENV} -t $APP_NAME .
+        run: docker build -t $MODULE_NAME .
       - name: Save image
-        run: docker save -o $APP_NAME.tar "${APP_NAME}:latest" # TODO: tag
-      - name: Set up SSH keys
-        run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
-      - name: Upload image to server
-        run: rsync -avz $APP_NAME.tar docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/${DEPLOY_ENV}/backend/
-      - name: Start the backend
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -o SendEnv=DATABASE_PASSWORD <<EOF
-              cd ~/${DEPLOY_ENV}/backend
-              docker-compose --profile deployed down
-              docker load -i $APP_NAME.tar
-              docker-compose --profile deployed up -d --no-color
-          EOF
-        env:
-          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        run: docker save -o $MODULE_NAME.tar "${MODULE_NAME}:latest" # TODO: tag
+      - name: Upload math result for job 1
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-image
+          path: ${{ env.MODULE_NAME }}.tar
+      - name: Store output for deployment
+        id: outputting
+        run: echo "module_name=$MODULE_NAME" >> "$GITHUB_OUTPUT"
+
+  deploy-dev:
+    name: Deploy Dev
+    needs: build
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      module_name: ${{ needs.vars.outputs.module_name }}
+      env_name: dev
+
+  deploy-prod:
+    name: Deploy Prod
+    needs: build
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      module_name: ${{ needs.vars.outputs.module_name }}
+      env_name: prod
