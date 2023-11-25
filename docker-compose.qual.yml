@@ -1,0 +1,10 @@
+services:
+  web:
+    ports:
+      - "50110:8080"
+  postgres:
+    ports:
+      - "50120:5432"
+  redis:
+    ports:
+      - "50130:6379"

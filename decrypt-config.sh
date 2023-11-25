@@ -9,4 +9,4 @@ if [ -z "${CONFIGURATION_PASSWORD}" ]; then
     exit 1
 fi
 
-gpg --quiet --batch --yes --decrypt --passphrase="$CONFIGURATION_PASSWORD" --output config.prod.toml config.prod.toml.gpg
+gpg --quiet --batch --yes --decrypt --passphrase="$CONFIGURATION_PASSWORD" --output config.$1.toml config.$1.toml.gpg

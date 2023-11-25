@@ -20,13 +20,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Decrypt configuration
-        run: ./decrypt-config.sh prod
+        run: |
+          ./decrypt-config.sh dev
+          ./decrypt-config.sh prod
         env:
           CONFIGURATION_PASSWORD: ${{ secrets.CONFIGURATION_PASSWORD }}
       - name: Build image
-        run: docker build -t $MODULE_NAME .
+        run: docker build -t ${MODULE_NAME}:${{ github.run_id }} -t ${MODULE_NAME}:latest .
       - name: Save image
-        run: docker save -o $MODULE_NAME.tar "${MODULE_NAME}:latest" # TODO: tag
+        run: docker save -o $MODULE_NAME.tar "${MODULE_NAME}:latest"
       - name: Save image as artifact
         uses: actions/upload-artifact@v3
         with:
@@ -49,7 +51,7 @@ jobs:
 
   deploy-prod:
     name: Deploy to prod
-    needs: build
+    needs: deploy-dev
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:

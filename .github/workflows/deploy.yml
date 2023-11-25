@@ -23,6 +23,7 @@ permissions:
   
 jobs:
   deploy:
+    name: deploy ${{ inputs.env_name }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.env_name }}
     steps:
@@ -51,7 +52,7 @@ jobs:
               export ENV_NAME=${{ inputs.env_name}}
               docker-compose --profile deployed down
               docker load -i ${{ inputs.module_name }}.tar
-              docker-compose --profile deployed up -d --no-color
+              docker-compose -f docker-compose.yml -f docker-compose.${{ inputs.env_name}}.yml --profile deployed up -d --no-color
           EOF
         env:
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
