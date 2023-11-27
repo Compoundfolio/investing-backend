@@ -28,7 +28,7 @@ jobs:
       - name: Build image
         run: docker build -t ${MODULE_NAME}:${{ github.run_id }} -t ${MODULE_NAME}:latest .
       - name: Save image to a file
-        run: docker save -o $MODULE_NAME.tar "${MODULE_NAME}:latest"
+        run: docker save -o $MODULE_NAME.tar "${MODULE_NAME}"
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

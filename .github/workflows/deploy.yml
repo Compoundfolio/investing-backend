@@ -39,17 +39,17 @@ jobs:
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
       - name: Upload image to server
         run: |
-          rsync -avz ${{ inputs.module_name}}.tar docker-compose.yml docker-compose.${{ inputs.env_name}}.yml \
+          mv docker-compose.${{ inputs.env_name}}.yml docker-compose.override.yml
+          rsync -avz ${{ inputs.module_name}}.tar docker-compose.yml docker-compose.override.yml \
           ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/${{ inputs.env_name }}/${{ inputs.module_name }}/
       - name: Start the backend
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -o SendEnv=DATABASE_PASSWORD <<EOF
               cd ~/${{ inputs.env_name }}/${{ inputs.module_name }}
               export ENV_NAME=${{ inputs.env_name }}
-              echo "# I'm in the $(pwd) directory, with ENV_NAME=$ENV_NAME"
               docker-compose --profile deployed down
               docker load -i ${{ inputs.module_name }}.tar
-              docker-compose -f docker-compose.yml -f docker-compose.${{ inputs.env_name }}.yml --profile deployed up -d --no-color
+              docker-compose --profile deployed up -d --no-color --force-recreate
           EOF
         env:
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
