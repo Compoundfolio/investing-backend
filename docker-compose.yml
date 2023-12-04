@@ -4,7 +4,7 @@ services:
   web:
     image: "investing-backend-rs"
     environment:
-      ENV_NAME: ${ENV_NAME}
+      ENV_NAME: ${ENV_NAME:-local}
     profiles: ["deployed"]
     depends_on:
       postgres:
@@ -13,7 +13,7 @@ services:
   postgres:
     image: "postgres"
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - ${DATABASE_VOLUME:-./pgdata}:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: compoundfoliodb
       POSTGRES_USER: compoundfoliodbadmin

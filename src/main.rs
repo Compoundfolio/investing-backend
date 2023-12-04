@@ -41,7 +41,7 @@ async fn main() {
         .with_max_level(tracing::Level::INFO)
         .init();
 
-    let graphql_schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish();
+    let graphql_schema = Schema::build(QueryRoot::default(), MutationRoot::default(), EmptySubscription).finish();
     let graphql_schema_sdl = graphql_schema.sdl();
     let cors = CorsLayer::new()
         .allow_methods(Any)
