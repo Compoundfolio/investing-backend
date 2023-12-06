@@ -1,18 +1,10 @@
 use tokio::io::{AsyncRead, AsyncReadExt};
 
 
-#[derive(Debug, thiserror::Error)]
-enum FreedomfinanceReportParsingError {
-    #[error(transparent)]
-    IO { #[from] source: std::io::Error },
-    #[error(transparent)]
-    Serde { #[from] source: serde_json::Error },
-}
 
-#[allow(unused)]
-async fn parse_report<R: AsyncRead + Unpin>(
+pub async fn parse_report<R: AsyncRead + Unpin>(
     mut reader: R,
-) -> Result<super::model::Report, FreedomfinanceReportParsingError> {
+) -> Result<super::model::Report, super::model::FreedomfinanceReportParsingError> {
     let mut buffer_for_entire_file = Vec::new();
     reader.read_to_end(&mut buffer_for_entire_file).await?;
     let parsed: super::model::Report = serde_json::from_slice(&buffer_for_entire_file)?;

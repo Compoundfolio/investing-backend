@@ -3,7 +3,6 @@
 mod auth;
 mod business;
 mod database;
-mod portfolio;
 mod settings;
 mod util;
 mod web;

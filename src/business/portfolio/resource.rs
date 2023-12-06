@@ -20,8 +20,8 @@ pub struct CreatePortfolio {
     pub label: String
 }
 
-impl From<crate::portfolio::model::Portfolio> for Portfolio {
-    fn from(value: crate::portfolio::model::Portfolio) -> Self {
+impl From<super::model::Portfolio> for Portfolio {
+    fn from(value: super::model::Portfolio) -> Self {
         Portfolio { id: value.id, label: value.label }
     }
 }

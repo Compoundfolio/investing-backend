@@ -7,12 +7,6 @@ use serde_enum_str::Deserialize_enum_str;
 #[allow(unused_imports)]
 use crate::util::serde::date_time_format;
 
-#[derive(Deserialize)]
-pub struct Report {
-    pub trades: Trades,
-    pub cash_flows: CashFlows,
-    pub cash_in_outs: Vec<CashInOut>
-}
 
 #[derive(Deserialize)]
 pub struct Trades {
@@ -97,4 +91,19 @@ pub struct CashInOut {
     pub details: String,
     pub value_usd_details: String,
     pub reverted: u64,
+}
+
+#[derive(Deserialize)]
+pub struct Report {
+    pub trades: Trades,
+    pub cash_flows: CashFlows,
+    pub cash_in_outs: Vec<CashInOut>
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum FreedomfinanceReportParsingError {
+    #[error(transparent)]
+    IO { #[from] source: std::io::Error },
+    #[error(transparent)]
+    Serde { #[from] source: serde_json::Error },
 }

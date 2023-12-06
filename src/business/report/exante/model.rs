@@ -103,3 +103,13 @@ pub struct Report {
     pub trade_operations: Vec<TradeOperation>,
     pub transactions: Vec<Transaction>,
 }
+
+#[derive(Debug, thiserror::Error)]
+pub enum ExanteReportParsingError {
+    #[error(transparent)]
+    IO { #[from] source: std::io::Error },
+    #[error("This file starts with an unknown header")]
+    UnknownHeader,
+    #[error(transparent)]
+    Csv { #[from] source: csv::Error }
+}

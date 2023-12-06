@@ -1,8 +1,16 @@
 use serde_json::json;
 
-use crate::portfolio::model::{AbstractTradeOperation, AbstractTransaction, AbstractTradeSide, AbstractTransactionType, AbstractOperationSource, Money};
-
+use super::super::model::{AbstractReport, AbstractTradeOperation, AbstractTransaction, AbstractTradeSide, AbstractTransactionType, AbstractOperationSource, Money};
 use super::model::TransactionOperationType;
+
+impl From<super::model::Report> for AbstractReport {
+    fn from(value: super::model::Report) -> Self {
+        Self {
+            trade_operations: value.trade_operations.into_iter().map(|v| v.into()).collect(),
+            transactions: value.transactions.into_iter().map(|v| v.into()).collect()
+        }
+    }
+}
 
 impl From<super::model::TradeOperation> for AbstractTradeOperation {
     fn from(value: super::model::TradeOperation) -> Self {
@@ -35,7 +43,7 @@ impl From<super::model::TradeOperation> for AbstractTradeOperation {
 impl From<super::model::Transaction> for AbstractTransaction {
     fn from(value: super::model::Transaction) -> Self {
         Self {
-            source: AbstractOperationSource::ExanteReport,
+            operation_source: AbstractOperationSource::ExanteReport,
             external_id: Some(value.id),
             date_time: value.timestamp,
             symbol_id: match value.symbol_id.as_str() {
@@ -50,10 +58,8 @@ impl From<super::model::Transaction> for AbstractTransaction {
                 TransactionOperationType::FundingWithdrawal => AbstractTransactionType::FundingWithdrawal,
                 TransactionOperationType::Unrecognized(a) => AbstractTransactionType::Unrecognized(a),
             },
-            amount: value.sum,
-            currency: value.asset,
-            comission: None,
-            comission_currency: None,
+            amount: Money::new(value.sum, value.asset),
+            commission: None,
             metadata: json!({
                 "account_id": value.account_id,
                 "isin": value.isin,

@@ -1,9 +1,16 @@
 use serde_json::json;
 
-use crate::portfolio::model::{AbstractTradeOperation, AbstractTransaction, AbstractTradeSide, AbstractTransactionType, AbstractOperationSource, Money};
-
+use super::super::model::{AbstractReport, AbstractTradeOperation, AbstractTransaction, AbstractTradeSide, AbstractTransactionType, AbstractOperationSource, Money};
 use super::model::CashInOutType;
 
+impl From<super::model::Report> for AbstractReport {
+    fn from(value: super::model::Report) -> Self {
+        Self {
+            trade_operations: value.trades.detailed.into_iter().map(|v| v.into()).collect(),
+            transactions: value.cash_in_outs.into_iter().map(|v| v.into()).collect()
+        }
+    }
+}
 
 impl From<super::model::DetailedTrade> for AbstractTradeOperation {
     fn from(value: super::model::DetailedTrade) -> Self {
@@ -34,24 +41,29 @@ impl From<super::model::DetailedTrade> for AbstractTradeOperation {
 
 impl From<super::model::CashInOut> for AbstractTransaction {
     fn from(value: super::model::CashInOut) -> Self {
+        let commission = if let Some(currency) = value.commission_currency {
+            if bigdecimal::Zero::is_zero(&value.commission) {
+                None
+            } else {
+                Some(Money::new(value.commission, currency))
+            }
+        } else {
+            None
+        };
+
         Self {
-            source: AbstractOperationSource::FreedomfinanceReport,
+            operation_source: AbstractOperationSource::FreedomfinanceReport,
             external_id: Some(value.id.to_string()),
             date_time: value.datetime,
             symbol_id: value.ticker,
-            amount: value.amount,
-            currency: value.currency,
+            amount: Money::new(value.amount, value.currency),
             operation_type: match value.operation_type {
                 CashInOutType::DividentReverted => AbstractTransactionType::RevertedDivident,
                 CashInOutType::Divident => AbstractTransactionType::Divident,
                 CashInOutType::Card => AbstractTransactionType::FundingWithdrawal,
                 CashInOutType::Unrecognized(a) => AbstractTransactionType::Unrecognized(a),
             },
-            comission: match value.commission {
-                some if some.to_string() == "0"  => None,
-                some => Some(some)
-            },
-            comission_currency: value.commission_currency,
+            commission,
             metadata: json!({
                 "transaction_id": value.transaction_id.to_string(),
                 "details": value.details,

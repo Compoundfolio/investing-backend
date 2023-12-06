@@ -1,4 +1,4 @@
-use super::model::{Report, TradeOperation, Transaction};
+use super::model::{Report, TradeOperation, Transaction, ExanteReportParsingError};
 use serde::de::DeserializeOwned;
 use tokio::io::{AsyncBufReadExt, AsyncRead, BufReader};
 
@@ -66,18 +66,8 @@ impl ReportRecordType {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-enum ExanteReportParsingError {
-    #[error(transparent)]
-    IO { #[from] source: std::io::Error },
-    #[error("This file starts with an unknown header")]
-    UnknownHeader,
-    #[error(transparent)]
-    Csv { #[from] source: csv::Error }
-}
 
-#[allow(unused)]
-async fn parse_report<R: AsyncRead + Unpin>(
+pub async fn parse_report<R: AsyncRead + Unpin>(
     reader: R,
 ) -> Result<Report, ExanteReportParsingError> {
     let original_buf_read = BufReader::new(reader);

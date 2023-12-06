@@ -7,15 +7,14 @@ use uuid::Uuid;
 
 use crate::database::schema;
 
-#[derive(Deserialize, Queryable, Selectable)]
-#[diesel(table_name = schema::portfolio )]
-#[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct Portfolio {
-    pub id: Uuid,
-    pub label: String
-}
+// --- transactions and trade operations
 
-// --- transactions and operations
+#[derive(Deserialize_enum_str, Serialize_enum_str)]
+#[derive(diesel_derive_enum::DbEnum, Debug, async_graphql::Enum, Copy, Clone, Eq, PartialEq)]
+#[ExistingTypePath = "crate::database::schema::sql_types::BrokerType"]
+pub enum BrokerType {
+    Exante, Freedomfinance
+}
 
 #[derive(Deserialize_enum_str, Serialize_enum_str)]
 #[derive(diesel_derive_enum::DbEnum, Debug)]
@@ -32,8 +31,15 @@ pub enum AbstractTradeSide {
     Sell
 }
 
+
+#[derive(Serialize)]
+pub struct AbstractReport {
+    pub trade_operations: Vec<AbstractTradeOperation>,
+    pub transactions: Vec<AbstractTransaction>
+}
+
 #[derive(Serialize,Deserialize,Insertable)]
-#[diesel(table_name = crate::database::schema::trade_operation )]
+#[diesel(table_name = crate::database::schema::trade_operation)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct AbstractTradeOperation {
     pub operation_source: AbstractOperationSource,
@@ -50,21 +56,23 @@ pub struct AbstractTradeOperation {
     pub metadata: serde_json::Value,
 }
 
-#[derive(Serialize,Deserialize)]
+#[derive(Serialize,Deserialize,Insertable)]
+#[diesel(table_name = crate::database::schema::transaction)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct AbstractTransaction {
-    pub source: AbstractOperationSource,
+    pub operation_source: AbstractOperationSource,
     pub external_id: Option<String>,
     pub date_time: NaiveDateTime,
     pub symbol_id: Option<String>,
-    pub amount: BigDecimal,
-    pub currency: String,
+    pub amount: Money,
     pub operation_type: AbstractTransactionType,
-    pub comission: Option<BigDecimal>,
-    pub comission_currency: Option<String>,
+    pub commission: Option<Money>,
     pub metadata: serde_json::Value,
 }
 
 #[derive(Deserialize_enum_str, Serialize_enum_str)]
+#[derive(Debug, AsExpression, FromSqlRow)]
+#[diesel(sql_type = diesel::sql_types::Varchar)]
 pub enum AbstractTransactionType {
     Tax,
     Divident,
@@ -75,7 +83,6 @@ pub enum AbstractTransactionType {
     #[serde(other)]
     Unrecognized(String),
 }
-
 
 #[derive(Debug, PartialEq, FromSqlRow, AsExpression, Serialize, Deserialize)]
 #[diesel(sql_type = schema::sql_types::CustomMoney)]
@@ -90,8 +97,6 @@ impl Money {
     }
 }
 
-// --- orm only
-
 #[derive(Deserialize, Insertable)]
 #[diesel(table_name = schema::trade_operation )]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -101,10 +106,22 @@ pub struct InsertTradeOperation {
     pub trade_operation: AbstractTradeOperation
 }
 
-#[derive(Deserialize, Insertable)]
-#[diesel(table_name = schema::portfolio )]
-#[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct InsertPortfolio<'a> {
-    pub app_user_id: Uuid,
-    pub label: &'a str
+#[derive(thiserror::Error, Debug)]
+pub enum AbstractReportParseError {
+    #[error(transparent)]
+    ExanteReportParsingError { #[from] source: super::exante::model::ExanteReportParsingError },
+    #[error(transparent)]
+    FreedomfinanceReportParsingError { #[from] source: super::freedomfinance::model::FreedomfinanceReportParsingError },
 }
+
+// --- orm implementations
+
+// impl ToSql<Varchar, PgConnection> for MyEnum {
+//     fn to_sql<W: Write>(&self, out: &mut Output<W, PgConnection>) -> serialize::Result {
+//         match *self {
+//             MyEnum::KnownVariant => out.write_all(b"KnownVariant")?,
+//             MyEnum::Unrecognized(ref s) => out.write_all(s.as_bytes())?,
+//         }
+//         Ok(IsNull::No)
+//     }
+// }

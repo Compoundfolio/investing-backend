@@ -2,6 +2,10 @@
 
 pub mod sql_types {
     #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "broker_type"))]
+    pub struct BrokerType;
+
+    #[derive(diesel::query_builder::QueryId, diesel::sql_types::SqlType)]
     #[diesel(postgres_type(name = "custom_money"))]
     pub struct CustomMoney;
 
@@ -48,11 +52,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::BrokerType;
+
     report_upload (id) {
         id -> Uuid,
         portfolio_id -> Uuid,
         label -> Varchar,
         created_at -> Timestamp,
+        broker -> BrokerType,
     }
 }
 

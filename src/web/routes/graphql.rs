@@ -13,7 +13,8 @@ use axum::{Extension, Router};
 
 use crate::auth::service::AuthClaims;
 use crate::ApplicationState;
-use crate::portfolio::resource::{PortfolioQuery, PortfolioMutation};
+use crate::business::portfolio::resource::{PortfolioQuery, PortfolioMutation};
+use crate::business::report::resource::ReportMutation;
 
 pub fn routes() -> Router<Arc<ApplicationState>> {
     Router::new().route("/graphql", get(graphql_playground).post(graphql_handler))
@@ -46,7 +47,7 @@ pub fn get_claims<'ctx>(ctx: &Context<'ctx>) -> async_graphql::Result<&'ctx Auth
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(MiscellaneousQuery, PortfolioQuery);
 #[derive(MergedObject, Default)]
-pub struct MutationRoot(MiscellaneousMutation, PortfolioMutation);
+pub struct MutationRoot( /* MiscellaneousMutation, */ PortfolioMutation, ReportMutation);
 pub type ServiceSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 
 
@@ -65,29 +66,13 @@ impl MiscellaneousQuery {
 
 }
 
-
+/*
 #[derive(Default)]
 struct MiscellaneousMutation;
 #[Object(rename_fields="camelCase", rename_args="camelCase")]
 impl MiscellaneousMutation {
-    #[graphql(deprecation = true)]
-    async fn upload_file(
-        &self,
-        ctx: &Context<'_>,
-        upload: Upload,
-    ) -> async_graphql::Result<String> {
-        let upload_value: UploadValue = upload.value(ctx)?;
-        let async_read = upload_value.into_async_read();
-        do_something_with_async(async_read);
-
-        Ok("OK".to_owned())
-    }
 }
-
-
-
-
-fn do_something_with_async<R: futures_util::io::AsyncRead + Unpin>(_reader: R) {}
+*/
 
 #[derive(Serialize, SimpleObject)]
 #[serde(rename_all = "camelCase")]
