@@ -11,5 +11,5 @@ pub async fn parse_report<R: tokio::io::AsyncRead + Unpin>(broker: BrokerType, r
             .map(|ok| ok.into())
             .map_err(|err| err.into()),
     };
-    return result;
+    result
 }

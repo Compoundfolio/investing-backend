@@ -1,6 +1,6 @@
 use bigdecimal::BigDecimal;
 use chrono::NaiveDateTime;
-use diesel::{Insertable, expression::AsExpression, deserialize::FromSqlRow, Selectable, Queryable};
+use diesel::{Insertable, expression::AsExpression, deserialize::FromSqlRow};
 use serde::{Deserialize, Serialize};
 use serde_enum_str::{Deserialize_enum_str,Serialize_enum_str};
 use uuid::Uuid;

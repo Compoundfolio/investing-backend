@@ -33,7 +33,7 @@ pub struct PortfolioQuery;
 impl PortfolioQuery {
     /// List of portfolios that belong to you
     async fn portfolios<'ctx>(&self, ctx: &Context<'ctx>) -> async_graphql::Result<Vec<Portfolio>> {
-        let claims = get_claims(&ctx)?;
+        let claims = get_claims(ctx)?;
         let state = ctx.data::<Arc<ApplicationState>>()?;
         let portfolios = state.repository.list_portfolios(claims.sub)?;
         Ok(portfolios.into_iter().map(Portfolio::from).collect())
@@ -47,7 +47,7 @@ pub struct PortfolioMutation;
 impl PortfolioMutation {
     /// Create a new portfolio
     async fn create_portfolio(&self, ctx: &Context<'_>, data: CreatePortfolio) -> async_graphql::Result<Portfolio> {
-        let claims = get_claims(&ctx)?;
+        let claims = get_claims(ctx)?;
         let state = ctx.data::<Arc<ApplicationState>>()?;
         let created = state.repository.create_portfolio(claims.sub, &data.label)?;
         Ok(created.into())
@@ -55,7 +55,7 @@ impl PortfolioMutation {
 
     /// Delete portfolio
     async fn delete_portfolio(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<Uuid> {
-        let claims = get_claims(&ctx)?;
+        let claims = get_claims(ctx)?;
         let state = ctx.data::<Arc<ApplicationState>>()?;
         state.repository.delete_portfolio(claims.sub, id)?;
         Ok(id)

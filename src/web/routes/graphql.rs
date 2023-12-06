@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
-use async_graphql::{Context, Object, Schema, Upload, UploadValue, MergedObject};
+use async_graphql::{Context, Object, Schema, MergedObject};
 use async_graphql::EmptySubscription;
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use async_graphql::SimpleObject;
@@ -37,10 +37,10 @@ async fn graphql_handler(
 }
 
 pub fn get_claims<'ctx>(ctx: &Context<'ctx>) -> async_graphql::Result<&'ctx AuthClaims> {
-    return Ok(ctx
+    return ctx
         .data::<Claims>()?
         .as_ref()
-        .ok_or_else(|| async_graphql::Error::new("You are not authorized."))?);
+        .ok_or_else(|| async_graphql::Error::new("You are not authorized."));
 }
 
 
@@ -58,7 +58,7 @@ struct MiscellaneousQuery;
 impl MiscellaneousQuery {
     /// Information about you as a signed in user
     async fn me<'ctx>(&self, ctx: &Context<'ctx>) -> async_graphql::Result<Me<'ctx>> {
-        let claims = get_claims(&ctx)?;
+        let claims = get_claims(ctx)?;
         Ok(Me {
             email: claims.email.as_str(),
         })
