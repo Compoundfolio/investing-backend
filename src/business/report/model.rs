@@ -1,11 +1,15 @@
+use std::io::Write;
+
 use bigdecimal::BigDecimal;
 use chrono::NaiveDateTime;
-use diesel::{Insertable, expression::AsExpression, deserialize::FromSqlRow};
+use diesel::{Insertable, expression::AsExpression, pg::{Pg, PgValue}, sql_types::{Decimal, Text, VarChar, Record}, backend::Backend};
+use diesel::deserialize::{FromSqlRow,FromSql};
+use diesel::serialize::{Output,ToSql,WriteTuple};
 use serde::{Deserialize, Serialize};
 use serde_enum_str::{Deserialize_enum_str,Serialize_enum_str};
 use uuid::Uuid;
 
-use crate::database::schema;
+use crate::database::schema::{self, sql_types::CustomMoney};
 
 // --- transactions and trade operations
 
@@ -116,12 +120,37 @@ pub enum AbstractReportParseError {
 
 // --- orm implementations
 
-// impl ToSql<Varchar, PgConnection> for MyEnum {
-//     fn to_sql<W: Write>(&self, out: &mut Output<W, PgConnection>) -> serialize::Result {
-//         match *self {
-//             MyEnum::KnownVariant => out.write_all(b"KnownVariant")?,
-//             MyEnum::Unrecognized(ref s) => out.write_all(s.as_bytes())?,
-//         }
-//         Ok(IsNull::No)
-//     }
-// }
+// TODO: When it works, make a post solution here:
+// https://github.com/diesel-rs/diesel/issues/1732
+// Thanks to this blogpost
+// https://inve.rs/postgres-diesel-composite/
+
+impl ToSql<CustomMoney, Pg> for Money {
+    fn to_sql(&self, out: &mut Output<Pg>) -> diesel::serialize::Result {
+        WriteTuple::<(diesel::sql_types::Numeric, Text)>::write_tuple(&(&self.value, &self.currency), out)
+    }
+}
+
+
+impl FromSql<CustomMoney, Pg> for Money {
+    fn from_sql(input: PgValue) -> diesel::deserialize::Result<Self> {
+        let (value, currency) = FromSql::<Record<(diesel::sql_types::Numeric, Text)>, Pg>::from_sql(input)?;
+        Ok(Money { value, currency })
+    }
+}
+
+impl ToSql<VarChar, Pg> for AbstractTransactionType {
+    fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, Pg>) -> diesel::serialize::Result {
+        let string_repr = self.to_string();
+        ToSql::<Text, Pg>::to_sql(&string_repr, &mut out.reborrow())
+    }
+}
+
+impl FromSql<VarChar, Pg>  for AbstractTransactionType  {
+    fn from_sql(input: PgValue) -> diesel::deserialize::Result<Self> {
+        match FromSql::<Text, Pg>::from_sql(input).map(|v: String| Self::try_from(v)) {
+            Ok(o) => Ok(o?),
+            Err(e) => Err(e),
+        }
+    }
+}
