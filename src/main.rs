@@ -23,7 +23,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use crate::settings::Settings;
-use crate::web::routes::graphql::{QueryRoot,MutationRoot};
+use crate::web::graphql::{QueryRoot,MutationRoot};
 use crate::database::CommonRepository;
 
 pub struct ApplicationState {
@@ -66,7 +66,7 @@ async fn main() {
 
     let app = Router::new()
         .merge(crate::auth::routes::routes())
-        .merge(crate::web::routes::graphql::routes())
+        .merge(crate::web::graphql::routes())
         .route(
             "/graphql/sdl",
             axum::routing::get(|| async { graphql_schema_sdl }),
@@ -90,6 +90,7 @@ pub fn establish_sql_connection(
     run_migrations: bool,
 ) -> Pool<ConnectionManager<PgConnection>> {
     let manager = ConnectionManager::<PgConnection>::new(sql_url);
+    // TODO: Set up logging for diesel when 
 
     let pool = Pool::builder()
         .test_on_check_out(true)

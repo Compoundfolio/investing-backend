@@ -59,8 +59,10 @@ pub struct TradeOperation {
 pub enum TransactionOperationType {
     #[serde(rename = "US TAX")]
     UsTax,
-    #[serde(rename = "DIVIDENT")]
-    Divident,
+    #[serde(rename = "TAX")]
+    Tax,
+    #[serde(rename = "DIVIDEND")]
+    Dividend,
     #[serde(rename = "TRADE")]
     Trade,
     #[serde(rename = "COMMISSION")]

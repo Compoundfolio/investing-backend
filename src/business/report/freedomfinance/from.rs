@@ -1,5 +1,7 @@
 use serde_json::json;
 
+use crate::business::report::model::BrokerType;
+
 use super::super::model::{AbstractReport, AbstractTradeOperation, AbstractTransaction, AbstractTradeSide, AbstractTransactionType, AbstractOperationSource, Money};
 use super::model::CashInOutType;
 
@@ -7,7 +9,8 @@ impl From<super::model::Report> for AbstractReport {
     fn from(value: super::model::Report) -> Self {
         Self {
             trade_operations: value.trades.detailed.into_iter().map(|v| v.into()).collect(),
-            transactions: value.cash_in_outs.into_iter().map(|v| v.into()).collect()
+            transactions: value.cash_in_outs.into_iter().map(|v| v.into()).collect(),
+            broker: BrokerType::Freedomfinance
         }
     }
 }
@@ -58,8 +61,8 @@ impl From<super::model::CashInOut> for AbstractTransaction {
             symbol_id: value.ticker,
             amount: Money::new(value.amount, value.currency),
             operation_type: match value.operation_type {
-                CashInOutType::DividentReverted => AbstractTransactionType::RevertedDivident,
-                CashInOutType::Divident => AbstractTransactionType::Divident,
+                CashInOutType::DividendReverted => AbstractTransactionType::RevertedDividend,
+                CashInOutType::Dividend => AbstractTransactionType::Dividend,
                 CashInOutType::Card => AbstractTransactionType::FundingWithdrawal,
                 CashInOutType::Unrecognized(a) => AbstractTransactionType::Unrecognized(a),
             },

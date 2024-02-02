@@ -2,7 +2,7 @@ use std::io::Write;
 
 use bigdecimal::BigDecimal;
 use chrono::NaiveDateTime;
-use diesel::{Insertable, expression::AsExpression, pg::{Pg, PgValue}, sql_types::{Decimal, Text, VarChar, Record}, backend::Backend};
+use diesel::{Insertable, expression::AsExpression, pg::{Pg, PgValue}, sql_types::{VarChar, Record}, backend::Backend};
 use diesel::deserialize::{FromSqlRow,FromSql};
 use diesel::serialize::{Output,ToSql,WriteTuple};
 use serde::{Deserialize, Serialize};
@@ -38,6 +38,7 @@ pub enum AbstractTradeSide {
 
 #[derive(Serialize)]
 pub struct AbstractReport {
+    pub broker: BrokerType,
     pub trade_operations: Vec<AbstractTradeOperation>,
     pub transactions: Vec<AbstractTransaction>
 }
@@ -60,7 +61,7 @@ pub struct AbstractTradeOperation {
     pub metadata: serde_json::Value,
 }
 
-#[derive(Serialize,Deserialize,Insertable)]
+#[derive(Serialize,Deserialize,Insertable,Debug)]
 #[diesel(table_name = crate::database::schema::transaction)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct AbstractTransaction {
@@ -79,11 +80,11 @@ pub struct AbstractTransaction {
 #[diesel(sql_type = diesel::sql_types::Varchar)]
 pub enum AbstractTransactionType {
     Tax,
-    Divident,
+    Dividend,
     Trade,
     Commission,
     FundingWithdrawal,
-    RevertedDivident,
+    RevertedDividend,
     #[serde(other)]
     Unrecognized(String),
 }
@@ -91,32 +92,65 @@ pub enum AbstractTransactionType {
 #[derive(Debug, PartialEq, FromSqlRow, AsExpression, Serialize, Deserialize)]
 #[diesel(sql_type = schema::sql_types::CustomMoney)]
 pub struct Money {
-    pub value: BigDecimal,
+    pub amount: BigDecimal,
     pub currency: String,
 }
 
 impl Money {
-    pub fn new(value: BigDecimal, currency: String) -> Self {
-        Self { value, currency }
+    pub fn new(amount: BigDecimal, currency: String) -> Self {
+        Self { amount, currency }
     }
 }
+
+
+pub struct ReportProcessingResult {
+    pub id: Uuid,
+    pub transactions: usize,
+    pub trade_operations: usize
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum ReportProcessingError {
+    #[error(transparent)]
+    ExanteReportParsingError { #[from] source: super::exante::model::ExanteReportParsingError },
+    #[error(transparent)]
+    FreedomfinanceReportParsingError { #[from] source: super::freedomfinance::model::FreedomfinanceReportParsingError },
+}
+
+
+// --- orm model
+
+#[derive(Deserialize, Insertable)]
+#[diesel(table_name = schema::report_upload )]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertReportUpload {
+    pub portfolio_id: Uuid,
+    pub label: String,
+    pub broker: BrokerType
+}
+
 
 #[derive(Deserialize, Insertable)]
 #[diesel(table_name = schema::trade_operation )]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct InsertTradeOperation {
     pub portfolio_id: Uuid,
+    pub report_upload_id: Uuid,
     #[diesel(embed)]
     pub trade_operation: AbstractTradeOperation
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum AbstractReportParseError {
-    #[error(transparent)]
-    ExanteReportParsingError { #[from] source: super::exante::model::ExanteReportParsingError },
-    #[error(transparent)]
-    FreedomfinanceReportParsingError { #[from] source: super::freedomfinance::model::FreedomfinanceReportParsingError },
+#[derive(Deserialize, Insertable, Debug)]
+#[diesel(table_name = schema::transaction )]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct InsertTransaction {
+    pub portfolio_id: Uuid,
+    pub report_upload_id: Uuid,
+    #[diesel(embed)]
+    pub transaction: AbstractTransaction
 }
+
+
 
 // --- orm implementations
 
@@ -127,28 +161,27 @@ pub enum AbstractReportParseError {
 
 impl ToSql<CustomMoney, Pg> for Money {
     fn to_sql(&self, out: &mut Output<Pg>) -> diesel::serialize::Result {
-        WriteTuple::<(diesel::sql_types::Numeric, Text)>::write_tuple(&(&self.value, &self.currency), out)
+        WriteTuple::<(diesel::sql_types::Numeric, diesel::sql_types::Text)>::write_tuple(&(self.amount.clone(), self.currency.clone()), out)
     }
 }
-
 
 impl FromSql<CustomMoney, Pg> for Money {
     fn from_sql(input: PgValue) -> diesel::deserialize::Result<Self> {
-        let (value, currency) = FromSql::<Record<(diesel::sql_types::Numeric, Text)>, Pg>::from_sql(input)?;
-        Ok(Money { value, currency })
+        let (value, currency) = FromSql::<Record<(diesel::sql_types::Numeric, diesel::sql_types::Text)>, Pg>::from_sql(input)?;
+        Ok(Money { amount: value, currency })
     }
 }
 
-impl ToSql<VarChar, Pg> for AbstractTransactionType {
+impl ToSql<diesel::sql_types::Text, Pg> for AbstractTransactionType {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, Pg>) -> diesel::serialize::Result {
         let string_repr = self.to_string();
-        ToSql::<Text, Pg>::to_sql(&string_repr, &mut out.reborrow())
+        ToSql::<diesel::sql_types::Text, Pg>::to_sql(&string_repr, &mut out.reborrow())
     }
 }
 
-impl FromSql<VarChar, Pg>  for AbstractTransactionType  {
+impl FromSql<diesel::sql_types::Text, Pg>  for AbstractTransactionType  {
     fn from_sql(input: PgValue) -> diesel::deserialize::Result<Self> {
-        match FromSql::<Text, Pg>::from_sql(input).map(|v: String| Self::try_from(v)) {
+        match FromSql::<diesel::sql_types::Text, Pg>::from_sql(input).map(|v: String| Self::try_from(v)) {
             Ok(o) => Ok(o?),
             Err(e) => Err(e),
         }

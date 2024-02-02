@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
 use crate::ApplicationState;
-use crate::web::routes::graphql::get_claims;
+use crate::web::graphql::{get_claims, get_state};
 
 #[derive(Serialize, SimpleObject)]
 #[serde(rename_all = "camelCase")]
@@ -34,7 +34,7 @@ impl PortfolioQuery {
     /// List of portfolios that belong to you
     async fn portfolios<'ctx>(&self, ctx: &Context<'ctx>) -> async_graphql::Result<Vec<Portfolio>> {
         let claims = get_claims(ctx)?;
-        let state = ctx.data::<Arc<ApplicationState>>()?;
+        let state = get_state(ctx)?;
         let portfolios = state.repository.list_portfolios(claims.sub)?;
         Ok(portfolios.into_iter().map(Portfolio::from).collect())
     }
@@ -48,7 +48,7 @@ impl PortfolioMutation {
     /// Create a new portfolio
     async fn create_portfolio(&self, ctx: &Context<'_>, data: CreatePortfolio) -> async_graphql::Result<Portfolio> {
         let claims = get_claims(ctx)?;
-        let state = ctx.data::<Arc<ApplicationState>>()?;
+        let state = get_state(ctx)?;
         let created = state.repository.create_portfolio(claims.sub, &data.label)?;
         Ok(created.into())
     }
@@ -56,7 +56,7 @@ impl PortfolioMutation {
     /// Delete portfolio
     async fn delete_portfolio(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<Uuid> {
         let claims = get_claims(ctx)?;
-        let state = ctx.data::<Arc<ApplicationState>>()?;
+        let state = get_state(ctx)?;
         state.repository.delete_portfolio(claims.sub, id)?;
         Ok(id)
     }

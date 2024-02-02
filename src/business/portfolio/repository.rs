@@ -12,9 +12,17 @@ impl CommonRepository {
                 app_user_id: user_id,
                 label
             })
-            .returning((dsl::id, dsl::label))
+            .returning(Portfolio::as_select())
             .get_result::<Portfolio>(&mut self.pool.get()?)?;
         Ok(result)
+    }
+
+    pub fn find_portfolio_by_id(&self, id: Uuid) -> Result<Option<Portfolio>, RepositoryError> {
+        Ok(dsl::portfolio
+           .find(id)
+           .select(Portfolio::as_select())
+           .first(&mut self.pool.get()?)
+           .optional()?)
     }
 
     pub fn list_portfolios(&self, user_id: Uuid) -> Result<Vec<Portfolio>, RepositoryError> {
@@ -33,6 +41,5 @@ impl CommonRepository {
             0 => Err(RepositoryError::NoRowsAffected),
             _ => Ok(())
         }
-        
     }
 }

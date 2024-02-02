@@ -12,7 +12,8 @@ use crate::database::schema;
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Portfolio {
     pub id: Uuid,
-    pub label: String
+    pub label: String,
+    pub app_user_id: Uuid
 }
 
 

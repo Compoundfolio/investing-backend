@@ -1,4 +1,4 @@
-pub mod routes;
+pub mod graphql;
 
 use serde::Serialize;
 

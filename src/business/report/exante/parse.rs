@@ -59,7 +59,7 @@ impl ReportRecordType {
         } else if is_header_suitable::<TradeOperation>(header) {
             Some(Self::TradeOperation)
         }
-        // TODO: Elif-elif-elif here
+        // Elif-elif-elif here
         else {
             None
         }

@@ -1,5 +1,7 @@
 use serde_json::json;
 
+use crate::business::report::model::BrokerType;
+
 use super::super::model::{AbstractReport, AbstractTradeOperation, AbstractTransaction, AbstractTradeSide, AbstractTransactionType, AbstractOperationSource, Money};
 use super::model::TransactionOperationType;
 
@@ -7,7 +9,8 @@ impl From<super::model::Report> for AbstractReport {
     fn from(value: super::model::Report) -> Self {
         Self {
             trade_operations: value.trade_operations.into_iter().map(|v| v.into()).collect(),
-            transactions: value.transactions.into_iter().map(|v| v.into()).collect()
+            transactions: value.transactions.into_iter().map(|v| v.into()).collect(),
+            broker: BrokerType::Exante
         }
     }
 }
@@ -52,7 +55,8 @@ impl From<super::model::Transaction> for AbstractTransaction {
             },
             operation_type: match value.operation_type {
                 TransactionOperationType::UsTax => AbstractTransactionType::Tax,
-                TransactionOperationType::Divident => AbstractTransactionType::Divident,
+                TransactionOperationType::Tax => AbstractTransactionType::Tax,
+                TransactionOperationType::Dividend => AbstractTransactionType::Dividend,
                 TransactionOperationType::Trade => AbstractTransactionType::Trade,
                 TransactionOperationType::Commission => AbstractTransactionType::Commission,
                 TransactionOperationType::FundingWithdrawal => AbstractTransactionType::FundingWithdrawal,

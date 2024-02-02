@@ -103,8 +103,9 @@ diesel::table! {
         symbol_id -> Nullable<Varchar>,
         amount -> CustomMoney,
         operation_type -> Varchar,
-        commission -> CustomMoney,
+        commission -> Nullable<CustomMoney>,
         metadata -> Jsonb,
+        report_upload_id -> Nullable<Uuid>,
     }
 }
 
@@ -114,6 +115,7 @@ diesel::joinable!(report_upload -> portfolio (portfolio_id));
 diesel::joinable!(trade_operation -> portfolio (portfolio_id));
 diesel::joinable!(trade_operation -> report_upload (report_upload_id));
 diesel::joinable!(transaction -> portfolio (portfolio_id));
+diesel::joinable!(transaction -> report_upload (report_upload_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     app_user,

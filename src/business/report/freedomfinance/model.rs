@@ -28,10 +28,10 @@ pub enum TradeOperationSide {
 
 #[derive(Deserialize_enum_str)]
 pub enum CashInOutType {
-    #[serde(rename = "divident_reverted")]
-    DividentReverted,
-    #[serde(rename = "divident")]
-    Divident,
+    #[serde(rename = "dividend_reverted")]
+    DividendReverted,
+    #[serde(rename = "dividend")]
+    Dividend,
     #[serde(rename = "card")]
     Card,
     #[serde(other)]
