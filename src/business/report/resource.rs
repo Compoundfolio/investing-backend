@@ -1,13 +1,11 @@
 
 use async_graphql::{Context, SimpleObject, Object, Upload, UploadValue};
 use tokio_util::compat::FuturesAsyncReadCompatExt;
-use serde::{Serialize};
+use serde::Serialize;
 use uuid::Uuid;
 
-use crate::ApplicationState;
 use crate::business::portfolio::security::is_portfolio_owner;
-use crate::web::graphql::{get_claims, get_state, DescriptiveError};
-
+use crate::web::graphql::{get_claims, get_state};
 use super::model::{BrokerType, ReportProcessingResult};
 use super::service::process_report;
 
@@ -32,20 +30,22 @@ impl ReportMutation {
     }
 }
 
+
+
 // --- model
 
 #[derive(Serialize, SimpleObject)]
 #[serde(rename_all = "camelCase")]
 pub struct ReportUploadResult {
     pub id: Uuid,
-    pub transactions: usize,
+    pub fiscal_transactions: usize,
     pub trade_operations: usize
 }
 
 impl From<ReportProcessingResult> for ReportUploadResult {
     fn from(value: ReportProcessingResult) -> Self {
-        let ReportProcessingResult { id, transactions, trade_operations } = value;
-        ReportUploadResult { id, transactions, trade_operations }
+        let ReportProcessingResult { id, fiscal_transactions, trade_operations } = value;
+        ReportUploadResult { id, fiscal_transactions, trade_operations }
     }
 }
 

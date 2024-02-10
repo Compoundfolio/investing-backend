@@ -1,4 +1,5 @@
 use super::model::{Report, TradeOperation, Transaction, ExanteReportParsingError};
+use super::model::TransactionOperationType;
 use serde::de::DeserializeOwned;
 use tokio::io::{AsyncBufReadExt, AsyncRead, BufReader};
 
@@ -96,7 +97,9 @@ pub async fn parse_report<R: AsyncRead + Unpin>(
                 ReportRecordType::Transaction => {
                     let report_item: Transaction =
                         record.deserialize(Some(&current_record_type.1))?;
-                    transactions.push(report_item);
+                    if report_item.isin == "None" && report_item.operation_type != TransactionOperationType::Trade {
+                        transactions.push(report_item); // only save fiscal tranactions
+                    }
                 }
             }
         }
@@ -111,6 +114,7 @@ pub async fn parse_report<R: AsyncRead + Unpin>(
 #[cfg(test)]
 mod test {
     use tokio::fs::File;
+    use uuid::Uuid;
 
     use super::*;
 
@@ -133,6 +137,12 @@ mod test {
 
         let report = parse_report(file).await.unwrap();
         assert_eq!(report.trade_operations.len(), 25);
-        assert_eq!(report.transactions.len(), 131);
+        assert_eq!(report.transactions.len(), 81); // not 131 - we are skipping trade-induced transactions
+        
+        // check number parsing precision
+        // this section can be removed if it breaks
+        let required_id = Uuid::parse_str("ee690bae-a737-4c7a-bba1-642a975a561a").unwrap();
+        let that_one_trade = report.trade_operations.iter().find(|o| o.order_id == required_id).unwrap();
+        assert_eq!(that_one_trade.price.to_string(), "76.49");
     }
 }

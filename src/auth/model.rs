@@ -1,7 +1,7 @@
-use axum::extract::rejection::TypedHeaderRejection;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
+use axum_extra::typed_header::TypedHeaderRejection;
 use chrono::NaiveDateTime;
 use jsonwebtoken_google::ParserError;
 use serde::{Deserialize, Serialize};

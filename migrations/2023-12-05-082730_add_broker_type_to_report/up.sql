@@ -35,6 +35,19 @@ ALTER TABLE trade_operation
 DROP TYPE custom_money;
 ALTER TYPE custom_money_temp RENAME TO custom_money;
 
--- 7. Make commission optional
+-- 7. Make some columns optional
 ALTER TABLE "transaction" 
     ALTER COLUMN commission DROP NOT NULL;
+ALTER TABLE "transaction"
+    ALTER COLUMN external_id DROP NOT NULL;
+ALTER TABLE "trade_operation"
+    ALTER COLUMN external_id DROP NOT NULL;
+ALTER TABLE "trade_operation"
+    ALTER COLUMN quantity SET NOT NULL;
+
+-- 8. Rename transaction table
+ALTER TABLE "transaction" RENAME TO fiscal_transaction;
+
+-- 9. Cleanup of useless brokerage data
+DELETE FROM fiscal_transaction
+WHERE LOWER(operation_type)='trade'

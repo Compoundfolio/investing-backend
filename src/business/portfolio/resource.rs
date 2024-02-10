@@ -1,10 +1,7 @@
-use std::sync::Arc;
-
 use async_graphql::{Context, SimpleObject, InputObject, Object};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::ApplicationState;
 use crate::web::graphql::{get_claims, get_state};
 
 #[derive(Serialize, SimpleObject)]

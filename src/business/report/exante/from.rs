@@ -2,34 +2,34 @@ use serde_json::json;
 
 use crate::business::report::model::BrokerType;
 
-use super::super::model::{AbstractReport, AbstractTradeOperation, AbstractTransaction, AbstractTradeSide, AbstractTransactionType, AbstractOperationSource, Money};
+use super::super::model::{AbstractReport, TradeOperation, FiscalTransaction, TradeOperationSide, FiscalTransactionType, OperationSource, Money};
 use super::model::TransactionOperationType;
 
 impl From<super::model::Report> for AbstractReport {
     fn from(value: super::model::Report) -> Self {
         Self {
             trade_operations: value.trade_operations.into_iter().map(|v| v.into()).collect(),
-            transactions: value.transactions.into_iter().map(|v| v.into()).collect(),
+            fiscal_transactions: value.transactions.into_iter().map(|v| v.into()).collect(),
             broker: BrokerType::Exante
         }
     }
 }
 
-impl From<super::model::TradeOperation> for AbstractTradeOperation {
+impl From<super::model::TradeOperation> for TradeOperation {
     fn from(value: super::model::TradeOperation) -> Self {
         Self { 
-            operation_source: AbstractOperationSource::ExanteReport,
+            operation_source: OperationSource::ExanteReport,
             external_id: Some(format!("{}/{}", value.order_id, value.order_pos)),
             date_time: value.timestamp,
             side: match value.side {
-                super::model::TradeOperationSide::Buy => AbstractTradeSide::Buy,
-                super::model::TradeOperationSide::Sell => AbstractTradeSide::Sell,
+                super::model::TradeOperationSide::Buy => TradeOperationSide::Buy,
+                super::model::TradeOperationSide::Sell => TradeOperationSide::Sell,
             },
             instrument_symbol: value.symbol_id,
             isin: value.isin,
             price: Money::new(value.price, value.currency.clone()),
             quantity: value.quantity,
-            commission: Money::new(value.commission, value.commission_currency),
+            commission: Some(Money::new(value.commission, value.commission_currency)),
             order_id: value.order_id.to_string(),
             summ: Money::new(value.traded_volume, value.currency),
             metadata: json!({
@@ -43,10 +43,10 @@ impl From<super::model::TradeOperation> for AbstractTradeOperation {
     }
 }
 
-impl From<super::model::Transaction> for AbstractTransaction {
+impl From<super::model::Transaction> for FiscalTransaction {
     fn from(value: super::model::Transaction) -> Self {
         Self {
-            operation_source: AbstractOperationSource::ExanteReport,
+            operation_source: OperationSource::ExanteReport,
             external_id: Some(value.id),
             date_time: value.timestamp,
             symbol_id: match value.symbol_id.as_str() {
@@ -54,13 +54,13 @@ impl From<super::model::Transaction> for AbstractTransaction {
                 some => Some(some.to_string())
             },
             operation_type: match value.operation_type {
-                TransactionOperationType::UsTax => AbstractTransactionType::Tax,
-                TransactionOperationType::Tax => AbstractTransactionType::Tax,
-                TransactionOperationType::Dividend => AbstractTransactionType::Dividend,
-                TransactionOperationType::Trade => AbstractTransactionType::Trade,
-                TransactionOperationType::Commission => AbstractTransactionType::Commission,
-                TransactionOperationType::FundingWithdrawal => AbstractTransactionType::FundingWithdrawal,
-                TransactionOperationType::Unrecognized(a) => AbstractTransactionType::Unrecognized(a),
+                TransactionOperationType::UsTax => FiscalTransactionType::Tax,
+                TransactionOperationType::Tax => FiscalTransactionType::Tax,
+                TransactionOperationType::Dividend => FiscalTransactionType::Dividend,
+                TransactionOperationType::Trade => FiscalTransactionType::Unrecognized("Trade".to_owned()),
+                TransactionOperationType::Commission => FiscalTransactionType::Commission,
+                TransactionOperationType::FundingWithdrawal => FiscalTransactionType::FundingWithdrawal,
+                TransactionOperationType::Unrecognized(a) => FiscalTransactionType::Unrecognized(a),
             },
             amount: Money::new(value.sum, value.asset),
             commission: None,

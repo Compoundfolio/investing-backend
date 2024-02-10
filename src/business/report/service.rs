@@ -1,8 +1,8 @@
 use uuid::Uuid;
 
-use crate::{ApplicationState, business::report::model::{InsertReportUpload, InsertTransaction, InsertTradeOperation}, auth::repository, web::graphql::DescriptiveError};
+use crate::{business::report::model::{InsertReportUpload, InsertFiscalTransaction, InsertTradeOperation}, web::graphql::errors::DescriptiveError, ApplicationState};
 
-use super::model::{BrokerType, AbstractReport, ReportProcessingError, ReportProcessingResult, AbstractTransactionType};
+use super::model::{BrokerType, AbstractReport, ReportProcessingError, ReportProcessingResult, FiscalTransactionType};
 
 pub async fn process_report<R: tokio::io::AsyncRead + Unpin>(
     state: &ApplicationState,
@@ -21,11 +21,11 @@ pub async fn process_report<R: tokio::io::AsyncRead + Unpin>(
             .map(|ok| ok.into())
             .map_err(|err| err.into()),
     };
-    let AbstractReport { transactions, trade_operations, .. } = parsed?;
+    let AbstractReport { fiscal_transactions: transactions, trade_operations, .. } = parsed?;
 
 
     for each in transactions.iter() {
-        if let AbstractTransactionType::Unrecognized(variant) = &each.operation_type {
+        if let FiscalTransactionType::Unrecognized(variant) = &each.operation_type {
            tracing::warn!("When parsing {broker} report for transactions, found unrecognized type: '{variant}'");
         }
     }
@@ -34,11 +34,11 @@ pub async fn process_report<R: tokio::io::AsyncRead + Unpin>(
         portfolio_id, label: original_filename, broker
     })?;
 
-    let inserted_transactions = state.repository.create_transactions(
-        transactions.into_iter().map(|t| InsertTransaction {
+    let inserted_transactions = state.repository.create_fiscal_transactions(
+        transactions.into_iter().map(|t| InsertFiscalTransaction {
             portfolio_id,
             report_upload_id,
-            transaction: t
+            fiscal_transaction: t
         }).collect()
     )?;
 
@@ -52,7 +52,7 @@ pub async fn process_report<R: tokio::io::AsyncRead + Unpin>(
 
     Ok(ReportProcessingResult {
         id: report_upload_id,
-        transactions: inserted_transactions,
+        fiscal_transactions: inserted_transactions,
         trade_operations: inserted_trade_opertaions,
     })
 }

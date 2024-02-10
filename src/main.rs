@@ -17,7 +17,6 @@ use diesel_migrations::HarnessWithOutput;
 use diesel_migrations::MigrationHarness;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
-use tracing::warn;
 
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -74,7 +73,6 @@ async fn main() {
         .nest_service("/static", get_service(ServeDir::new("./static")))
         .layer(Extension(graphql_schema))
         .layer(cors)
-        .layer(axum::middleware::from_fn(middleware_add_version_header))
         .with_state(Arc::new(state));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
@@ -114,33 +112,4 @@ pub fn establish_sql_connection(
 
 pub fn establish_redis_connection(redus_url: &str) -> redis::Client {
     redis::Client::open(redus_url).expect("Could not create a Redis client")
-}
-
-async fn middleware_add_version_header<B>(
-    request: axum::http::Request<B>,
-    next: axum::middleware::Next<B>,
-) -> axum::response::Response {
-    let mut response = next.run(request).await;
-    let mut description = String::new();
-    if let Some(name) = option_env!("CARGO_PKG_NAME") {
-        description.push_str(name);
-        description.push('/');
-    } else {
-        description.push_str("axum-based ");
-    }
-    if let Some(version) = option_env!("CARGO_PKG_VERSION") {
-        description.push('v');
-        description.push_str(version);
-    }
-    match description.parse() {
-        Ok(header) => {
-            response
-                .headers_mut()
-                .insert(axum::http::header::SERVER, header);
-        }
-        Err(e) => {
-            warn!("Could not add version header because its value is not usable: {e}");
-        }
-    };
-    response
 }

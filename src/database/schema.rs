@@ -44,6 +44,26 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::OperationSourceType;
+    use super::sql_types::CustomMoney;
+
+    fiscal_transaction (id) {
+        id -> Uuid,
+        portfolio_id -> Uuid,
+        operation_source -> OperationSourceType,
+        external_id -> Nullable<Varchar>,
+        date_time -> Timestamp,
+        symbol_id -> Nullable<Varchar>,
+        amount -> CustomMoney,
+        operation_type -> Varchar,
+        commission -> Nullable<CustomMoney>,
+        metadata -> Jsonb,
+        report_upload_id -> Nullable<Uuid>,
+    }
+}
+
+diesel::table! {
     portfolio (id) {
         id -> Uuid,
         app_user_id -> Uuid,
@@ -75,13 +95,13 @@ diesel::table! {
         portfolio_id -> Uuid,
         report_upload_id -> Nullable<Uuid>,
         operation_source -> OperationSourceType,
-        external_id -> Varchar,
+        external_id -> Nullable<Varchar>,
         date_time -> Timestamp,
         side -> TradeSideType,
         instrument_symbol -> Varchar,
         isin -> Varchar,
         price -> CustomMoney,
-        quantity -> Nullable<Int4>,
+        quantity -> Int4,
         commission -> Nullable<CustomMoney>,
         order_id -> Varchar,
         summ -> CustomMoney,
@@ -89,39 +109,19 @@ diesel::table! {
     }
 }
 
-diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::OperationSourceType;
-    use super::sql_types::CustomMoney;
-
-    transaction (id) {
-        id -> Uuid,
-        portfolio_id -> Uuid,
-        operation_source -> OperationSourceType,
-        external_id -> Varchar,
-        date_time -> Timestamp,
-        symbol_id -> Nullable<Varchar>,
-        amount -> CustomMoney,
-        operation_type -> Varchar,
-        commission -> Nullable<CustomMoney>,
-        metadata -> Jsonb,
-        report_upload_id -> Nullable<Uuid>,
-    }
-}
-
 diesel::joinable!(app_user_login_method -> app_user (app_user_id));
+diesel::joinable!(fiscal_transaction -> portfolio (portfolio_id));
+diesel::joinable!(fiscal_transaction -> report_upload (report_upload_id));
 diesel::joinable!(portfolio -> app_user (app_user_id));
 diesel::joinable!(report_upload -> portfolio (portfolio_id));
 diesel::joinable!(trade_operation -> portfolio (portfolio_id));
 diesel::joinable!(trade_operation -> report_upload (report_upload_id));
-diesel::joinable!(transaction -> portfolio (portfolio_id));
-diesel::joinable!(transaction -> report_upload (report_upload_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     app_user,
     app_user_login_method,
+    fiscal_transaction,
     portfolio,
     report_upload,
     trade_operation,
-    transaction,
 );

@@ -32,10 +32,10 @@ mutation {
 ```
 Store the ID of the generated report. Then, you will have to execute a command in terminal:
 ```sh
-curl -w "\nTotal time: %{time_total}s\n" --show-error -D -
-    -X POST localhost:8080/graphql 
-    -H "Authorization: Bearer $TOKEN" 
-    --form 'operations={"query": "mutation UploadFile($file: Upload!) { uploadReport(brokerage: EXANTE, portfolioId: \"d5bd66bb-d8fb-4da2-849e-5af7593a35ba\", upload: $file) { id, transactions, tradeOperations} }", "variables": { "file": null } }' 
-    --form 'map={ "nFile": ["variables.file"] }' 
+curl -w "\nTotal time: %{time_total}s\n" --show-error -D - \
+    -X POST localhost:8080/graphql \
+    -H "Authorization: Bearer $TOKEN" \
+    --form 'operations={"query": "mutation UploadFile($file: Upload!) { uploadReport(brokerage: EXANTE, portfolioId: \"d5bd66bb-d8fb-4da2-849e-5af7593a35ba\", upload: $file) { id, fiscalTransactions, tradeOperations} }", "variables": { "file": null } }'  \
+    --form 'map={ "nFile": ["variables.file"] }' \
     --form nFile=@testdata/exante_small_report.csv
 ```

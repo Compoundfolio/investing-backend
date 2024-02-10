@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::database::{schema, CommonRepository, RepositoryError};
 
-use super::model::{InsertTransaction, InsertTradeOperation, InsertReportUpload};
+use super::model::{InsertFiscalTransaction, InsertReportUpload, InsertTradeOperation, SelectFiscalTransaction, SelectTradeOperation};
 
 impl CommonRepository {
 
@@ -16,10 +16,26 @@ impl CommonRepository {
         Ok(report_upload_id)
     }
 
-    pub fn create_transactions(&self, transactions: Vec<InsertTransaction>) -> Result<usize, RepositoryError> {
-        use schema::transaction::dsl;
-        Ok(insert_into(dsl::transaction)
-            .values(transactions)
+    pub fn list_fiscal_transactions(&self, portfolio_id: Uuid) -> Result<Vec<SelectFiscalTransaction>, RepositoryError> {
+        use schema::fiscal_transaction::dsl;
+        Ok(dsl::fiscal_transaction
+            .filter(dsl::portfolio_id.eq(portfolio_id))
+            .select(SelectFiscalTransaction::as_select())
+            .load(&mut self.pool.get()?)?)
+    }
+
+    pub fn list_trade_operations(&self, portfolio_id: Uuid) -> Result<Vec<SelectTradeOperation>, RepositoryError> {
+        use schema::trade_operation::dsl;
+        Ok(dsl::trade_operation
+            .filter(dsl::portfolio_id.eq(portfolio_id))
+            .select(SelectTradeOperation::as_select())
+            .load(&mut self.pool.get()?)?)
+    }
+
+    pub fn create_fiscal_transactions(&self, fiscal_transactions: Vec<InsertFiscalTransaction>) -> Result<usize, RepositoryError> {
+        use schema::fiscal_transaction::dsl;
+        Ok(insert_into(dsl::fiscal_transaction)
+            .values(fiscal_transactions)
             .on_conflict((dsl::operation_source, dsl::external_id))
             .do_update()
             .set((

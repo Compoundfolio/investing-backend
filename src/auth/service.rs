@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
-use axum::{
-    headers::{authorization::Bearer, Authorization},
-    http::request::Parts,
+use axum_extra::{
     TypedHeader,
+    headers::{authorization::Bearer, Authorization},
 };
+use axum::http::request::Parts;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

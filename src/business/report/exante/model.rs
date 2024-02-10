@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use bigdecimal::BigDecimal;
+use rust_decimal::Decimal;
 use serde::Deserialize;
 use serde_enum_str::Deserialize_enum_str;
 use uuid::Uuid;
@@ -30,19 +30,19 @@ pub struct TradeOperation {
     #[serde(rename = "Type")]
     pub trade_operation_type: String, // like "STOCK"
     #[serde(rename = "Price")]
-    pub price: BigDecimal,
+    pub price: Decimal,
     #[serde(rename = "Currency")]
     pub currency: String,
     #[serde(rename = "Quantity")]
     pub quantity: i32,
     #[serde(rename = "Commission")]
-    pub commission: BigDecimal,
+    pub commission: Decimal,
     #[serde(rename = "Commission Currency")]
     pub commission_currency: String,
     #[serde(rename = "P&L")]
-    pub pnl: BigDecimal,
+    pub pnl: Decimal,
     #[serde(rename = "Traded Volume")]
-    pub traded_volume: BigDecimal, // as a summ without commission
+    pub traded_volume: Decimal, // as a summ without commission
     #[serde(rename = "Order Id")]
     pub order_id: Uuid,
     #[serde(rename = "Order pos")]
@@ -55,7 +55,7 @@ pub struct TradeOperation {
     pub trade_type: String, // like "TRADE"
 }
 
-#[derive(Deserialize_enum_str)]
+#[derive(Deserialize_enum_str,PartialEq)]
 pub enum TransactionOperationType {
     #[serde(rename = "US TAX")]
     UsTax,
@@ -82,17 +82,17 @@ pub struct Transaction {
     #[serde(rename = "Symbol ID")]
     pub symbol_id: String, // ticker or "None"
     #[serde(rename = "ISIN")]
-    pub isin: String,
+    pub isin: String, // isin of the `asset` if it is a ticker
     #[serde(rename = "Operation type")]
     pub operation_type: TransactionOperationType,
     #[serde(rename = "When", with = "date_time_format")]
     pub timestamp: NaiveDateTime,
     #[serde(rename = "Sum")]
-    pub sum: BigDecimal,
+    pub sum: Decimal,
     #[serde(rename = "Asset")]
     pub asset: String, // always currency or ticker
     #[serde(rename = "EUR equivalent")]
-    pub eur_equivalent: BigDecimal,
+    pub eur_equivalent: Decimal,
     #[serde(rename = "Comment")]
     pub comment: String,
     #[serde(rename = "UUID")]
