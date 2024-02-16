@@ -202,6 +202,11 @@ fn validate_password(pass: &str) -> Result<(), ValidationError> {
             "Password should be at least 8 characters long",
         ));
     }
+    if analyzed.numbers_count() < 1 {
+        return Err(ValidationError::new(
+            "Password should contain at least 1 number symbol",
+        ));
+    }
     if analyzed.lowercase_letters_count() < 1 {
         return Err(ValidationError::new(
             "Password should contain at least 1 lowercase letter",
