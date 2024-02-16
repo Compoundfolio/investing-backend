@@ -1,4 +1,4 @@
-use crate::business::report::model::{SelectFiscalTransaction, FiscalTransactionType, SelectTradeOperation, TradeOperationSide};
+use crate::business::{fiscal_transaction::model::{FiscalTransactionType, SelectFiscalTransaction}, trade_operation::model::{SelectTradeOperation, TradeOperationSide}};
 
 use super::resource::{UserTransaction, UserTransactionTradeSide, UserTransactionType};
 
@@ -22,6 +22,7 @@ impl From<SelectFiscalTransaction> for UserTransaction {
     fn from(value: SelectFiscalTransaction) -> Self {
         Self {
             unrecognized_type: if let FiscalTransactionType::Unrecognized(ref t) = value.i.operation_type { Some(t.clone()) } else { None },
+            brokerage: value.i.broker,
             user_transaction_type: value.i.operation_type.into(),
             date_time: value.i.date_time,
             summ: value.i.amount,
@@ -47,11 +48,12 @@ impl From<TradeOperationSide> for UserTransactionTradeSide {
 impl From<SelectTradeOperation> for UserTransaction {
     fn from(value: SelectTradeOperation) -> Self {
         let operation_signum = match value.i.side {
-            crate::business::report::model::TradeOperationSide::Buy => -1,
-            crate::business::report::model::TradeOperationSide::Sell => 1,
+            crate::business::trade_operation::model::TradeOperationSide::Buy => -1,
+            crate::business::trade_operation::model::TradeOperationSide::Sell => 1,
         };
         Self {
             user_transaction_type: UserTransactionType::Trade,
+            brokerage: value.i.broker,
             date_time: value.i.date_time,
             summ: value.i.summ * operation_signum,
             symbol: Some(value.i.instrument_symbol),

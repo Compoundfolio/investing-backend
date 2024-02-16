@@ -1,8 +1,8 @@
 use uuid::Uuid;
 
-use crate::{business::report::model::{InsertReportUpload, InsertFiscalTransaction, InsertTradeOperation}, web::graphql::errors::DescriptiveError, ApplicationState};
+use crate::{business::{fiscal_transaction::model::{FiscalTransactionType, InsertFiscalTransaction}, model::BrokerType, report::model::InsertReportUpload, trade_operation::model::InsertTradeOperation}, web::graphql::errors::DescriptiveError, ApplicationState};
 
-use super::model::{BrokerType, AbstractReport, ReportProcessingError, ReportProcessingResult, FiscalTransactionType};
+use super::model::{AbstractReport, ReportProcessingError, ReportProcessingResult};
 
 pub async fn process_report<R: tokio::io::AsyncRead + Unpin>(
     state: &ApplicationState,

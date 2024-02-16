@@ -4,7 +4,7 @@ use serde::Serialize;
 use uuid::Uuid;
 
 use crate::business::portfolio::security::is_portfolio_owner;
-use crate::business::report::model::Money;
+use crate::business::model::{BrokerType, Money};
 use crate::web::graphql::{get_claims, get_state};
 
 
@@ -69,6 +69,8 @@ pub enum UserTransactionType {
 #[derive(async_graphql::Enum, Copy, Clone, Eq, PartialEq, Serialize)]
 pub enum UserTransactionTradeSide { Buy, Sell }
 
+
+
 /// User-transaction is any operation recorded in a portfolio, like trade
 /// or a fiscal transaction, seen from user perspective as a single entity
 /// type. In other words, it is an abstraction above trade operations and
@@ -77,6 +79,8 @@ pub enum UserTransactionTradeSide { Buy, Sell }
 #[serde(rename_all = "camelCase")]
 pub struct UserTransaction {
     pub user_transaction_type: UserTransactionType,
+    /// Optionally contains name of the brokerage that manages the transaction.
+    pub brokerage: Option<BrokerType>,
     /// total change of balance as a result of the transaction. Can be negative.
     pub summ: Money,
     /// Ticker of the related instrument. Appears in TRADE, DIVIDENT and sometimes TAX operations.

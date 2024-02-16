@@ -47,6 +47,7 @@ diesel::table! {
     use diesel::sql_types::*;
     use super::sql_types::OperationSourceType;
     use super::sql_types::CustomMoney;
+    use super::sql_types::BrokerType;
 
     fiscal_transaction (id) {
         id -> Uuid,
@@ -59,6 +60,7 @@ diesel::table! {
         operation_type -> Varchar,
         commission -> Nullable<CustomMoney>,
         metadata -> Jsonb,
+        broker -> Nullable<BrokerType>,
         report_upload_id -> Nullable<Uuid>,
     }
 }
@@ -89,6 +91,7 @@ diesel::table! {
     use super::sql_types::OperationSourceType;
     use super::sql_types::TradeSideType;
     use super::sql_types::CustomMoney;
+    use super::sql_types::BrokerType;
 
     trade_operation (id) {
         id -> Uuid,
@@ -106,6 +109,7 @@ diesel::table! {
         order_id -> Varchar,
         summ -> CustomMoney,
         metadata -> Jsonb,
+        broker -> Nullable<BrokerType>,
     }
 }
 

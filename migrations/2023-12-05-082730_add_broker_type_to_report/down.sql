@@ -9,5 +9,8 @@ ALTER COLUMN created_at DROP DEFAULT;
 ALTER TABLE transaction DROP COLUMN report_upload_id;
 -- 2.
 ALTER TABLE report_upload DROP COLUMN broker;
+ALTER TABLE transaction DROP COLUMN broker;
+ALTER TABLE trade_operation DROP COLUMN broker;
 DROP TYPE broker_type;
+
 

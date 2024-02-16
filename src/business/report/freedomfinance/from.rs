@@ -1,9 +1,9 @@
 use serde_json::json;
 
-use crate::business::report::model::BrokerType;
-
-use super::super::model::{AbstractReport, TradeOperation, FiscalTransaction, TradeOperationSide, FiscalTransactionType, OperationSource, Money};
+use super::super::model::AbstractReport;
 use super::model::CashInOutType;
+
+use crate::{business::{fiscal_transaction::model::{FiscalTransaction, FiscalTransactionType}, model::{BrokerType, Money, OperationSource}, trade_operation::model::{TradeOperation, TradeOperationSide}}};
 
 impl From<super::model::Report> for AbstractReport {
     fn from(value: super::model::Report) -> Self {
@@ -19,6 +19,7 @@ impl From<super::model::DetailedTrade> for TradeOperation {
     fn from(value: super::model::DetailedTrade) -> Self {
         Self { 
             operation_source: OperationSource::FreedomfinanceReport,
+            broker: Some(BrokerType::Freedomfinance),
             external_id: Some(value.id.to_string()),
             date_time: value.date,
             side: match value.operation { 
@@ -56,6 +57,7 @@ impl From<super::model::CashInOut> for FiscalTransaction {
 
         Self {
             operation_source: OperationSource::FreedomfinanceReport,
+            broker: Some(BrokerType::Freedomfinance),
             external_id: Some(value.id.to_string()),
             date_time: value.datetime,
             symbol_id: value.ticker,

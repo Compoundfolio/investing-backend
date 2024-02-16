@@ -7,7 +7,10 @@ ALTER TABLE report_upload
     ADD broker broker_type NOT NULL DEFAULT 'exante';
 ALTER TABLE report_upload 
     ALTER COLUMN broker DROP DEFAULT;
-
+ALTER TABLE transaction
+    ADD broker broker_type;
+ALTER TABLE trade_operation
+    ADD broker broker_type;
 -- 3. Add upload id into transaction
 ALTER TABLE transaction
     ADD report_upload_id UUID NULL REFERENCES report_upload (id);

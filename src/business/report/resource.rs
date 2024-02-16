@@ -4,9 +4,10 @@ use tokio_util::compat::FuturesAsyncReadCompatExt;
 use serde::Serialize;
 use uuid::Uuid;
 
+use crate::business::model::BrokerType;
 use crate::business::portfolio::security::is_portfolio_owner;
 use crate::web::graphql::{get_claims, get_state};
-use super::model::{BrokerType, ReportProcessingResult};
+use super::model::ReportProcessingResult;
 use super::service::process_report;
 
 

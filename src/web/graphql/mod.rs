@@ -20,6 +20,13 @@ use crate::business::report::resource::ReportMutation;
 
 pub mod errors;
 
+pub mod model {
+    use serde::Serialize;
+
+    #[derive(async_graphql::Enum, Copy, Clone, Eq, PartialEq, Serialize)]
+    pub enum BrokerageType { Exante, Freedomfinance }
+}
+
 // --- configurations of GraphQL
 
 pub fn routes() -> Router<Arc<ApplicationState>> {
