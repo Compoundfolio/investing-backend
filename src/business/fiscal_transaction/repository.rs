@@ -1,22 +1,46 @@
 
+use crate::database::schema::fiscal_transaction::dsl;
 use diesel::{insert_into, prelude::*, upsert::excluded};
 use uuid::Uuid;
 
-use crate::database::{schema, CommonRepository, RepositoryError};
+use crate::database::{CommonRepository, RepositoryError};
 
 use super::model::{InsertFiscalTransaction, SelectFiscalTransaction};
 
 impl CommonRepository {
     pub fn list_fiscal_transactions(&self, portfolio_id: Uuid) -> Result<Vec<SelectFiscalTransaction>, RepositoryError> {
-        use schema::fiscal_transaction::dsl;
         Ok(dsl::fiscal_transaction
             .filter(dsl::portfolio_id.eq(portfolio_id))
             .select(SelectFiscalTransaction::as_select())
             .load(&mut self.pool.get()?)?)
     }
 
+    pub fn find_fiscal_transaction_by_id(&self, fiscal_transaction_id: Uuid) -> Result<Option<SelectFiscalTransaction>, RepositoryError> {
+        Ok(dsl::fiscal_transaction
+            .filter(dsl::id.eq(fiscal_transaction_id))
+            .select(SelectFiscalTransaction::as_select())
+            .first(&mut self.pool.get()?)
+            .optional()?)
+    }
+
+    pub fn create_fiscal_transaction(&self, fiscal_transaction: InsertFiscalTransaction) -> Result<Uuid, RepositoryError> {
+        Ok(diesel::insert_into(dsl::fiscal_transaction)
+            .values(fiscal_transaction)
+            .returning(dsl::id)
+            .get_result::<Uuid>(&mut self.pool.get()?)?)
+    }
+
+    pub fn delete_fiscal_transaction(&self, id: Uuid) -> Result<(), RepositoryError> {
+        let affected = diesel::delete(dsl::fiscal_transaction
+            .filter(dsl::id.eq(id)))
+            .execute(&mut self.pool.get()?)?;
+        match affected {
+            0 => Err(RepositoryError::NoRowsAffected),
+            _ => Ok(())
+        }
+    }
+
     pub fn create_fiscal_transactions(&self, fiscal_transactions: Vec<InsertFiscalTransaction>) -> Result<usize, RepositoryError> {
-        use schema::fiscal_transaction::dsl;
         Ok(insert_into(dsl::fiscal_transaction)
             .values(fiscal_transactions)
             .on_conflict((dsl::operation_source, dsl::external_id))

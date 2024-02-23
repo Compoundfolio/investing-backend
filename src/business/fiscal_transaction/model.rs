@@ -44,7 +44,7 @@ pub enum FiscalTransactionType {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct InsertFiscalTransaction {
     pub portfolio_id: Uuid,
-    pub report_upload_id: Uuid,
+    pub report_upload_id: Option<Uuid>,
     #[diesel(embed)]
     pub fiscal_transaction: FiscalTransaction
 }
@@ -54,7 +54,7 @@ pub struct InsertFiscalTransaction {
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct SelectFiscalTransaction {
     pub id: Uuid,
-//    pub portfolio_id: Uuid,
+    pub portfolio_id: Uuid,
 //    pub report_upload_id: Option<Uuid>,
     #[diesel(embed)]
     pub i: FiscalTransaction

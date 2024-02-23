@@ -33,9 +33,10 @@ impl CommonRepository {
     }
 
     pub fn delete_portfolio(&self, user_id: Uuid, porfolio_id: Uuid) -> Result<(), RepositoryError> {
-        let affected = diesel::delete(dsl::portfolio)
+        // TODO: SOMEHOW DO 
+        let affected = diesel::delete(dsl::portfolio
             .filter(dsl::app_user_id.eq(user_id))
-            .filter(dsl::id.eq(porfolio_id))
+            .filter(dsl::id.eq(porfolio_id)))
             .execute(&mut self.pool.get()?)?;
         match affected {
             0 => Err(RepositoryError::NoRowsAffected),

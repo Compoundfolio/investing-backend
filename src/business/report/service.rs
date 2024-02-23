@@ -37,7 +37,7 @@ pub async fn process_report<R: tokio::io::AsyncRead + Unpin>(
     let inserted_transactions = state.repository.create_fiscal_transactions(
         transactions.into_iter().map(|t| InsertFiscalTransaction {
             portfolio_id,
-            report_upload_id,
+            report_upload_id: Some(report_upload_id),
             fiscal_transaction: t
         }).collect()
     )?;

@@ -13,7 +13,8 @@ use axum::routing::get;
 use axum::{Extension, Router};
 
 use crate::auth::service::AuthClaims;
-use crate::business::user_transaction::resource::{UserTransactionMutation, UserTransactionQuery};
+use crate::business::fiscal_transaction::resource::FiscalTransactionMutation;
+use crate::business::user_transaction::resource::UserTransactionQuery;
 use crate::ApplicationState;
 use crate::business::portfolio::resource::{PortfolioQuery, PortfolioMutation};
 use crate::business::report::resource::ReportMutation;
@@ -21,10 +22,10 @@ use crate::business::report::resource::ReportMutation;
 pub mod errors;
 
 pub mod model {
-    use serde::Serialize;
+    // use serde::Serialize;
 
-    #[derive(async_graphql::Enum, Copy, Clone, Eq, PartialEq, Serialize)]
-    pub enum BrokerageType { Exante, Freedomfinance }
+    // #[derive(async_graphql::Enum, Copy, Clone, Eq, PartialEq, Serialize)]
+    // pub enum BrokerageType { Exante, Freedomfinance }
 }
 
 // --- configurations of GraphQL
@@ -68,7 +69,7 @@ pub fn get_state<'ctx>(ctx: &Context<'ctx>) -> async_graphql::Result<&'ctx Arc<A
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(MiscellaneousQuery, PortfolioQuery, UserTransactionQuery);
 #[derive(MergedObject, Default)]
-pub struct MutationRoot( /* MiscellaneousMutation, */ PortfolioMutation, ReportMutation, UserTransactionMutation);
+pub struct MutationRoot(PortfolioMutation, ReportMutation, FiscalTransactionMutation);
 pub type ServiceSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 
 

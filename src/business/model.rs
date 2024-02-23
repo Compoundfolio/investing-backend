@@ -1,4 +1,4 @@
-use async_graphql::SimpleObject;
+use async_graphql::{InputObject, SimpleObject};
 use rust_decimal::Decimal;
 
 use diesel::{expression::AsExpression, pg::{Pg, PgValue}, sql_types::Record};
@@ -32,8 +32,9 @@ pub enum OperationSource {
 
 // --- money
 
-#[derive(Debug, PartialEq, FromSqlRow, AsExpression, Serialize, Deserialize, SimpleObject)]
+#[derive(Debug, PartialEq, FromSqlRow, AsExpression, Serialize, Deserialize, SimpleObject, InputObject)]
 #[diesel(sql_type = schema::sql_types::CustomMoney)]
+#[graphql(input_name = "MoneyInput")]
 pub struct Money {
     pub amount: Decimal,
     pub currency: String,

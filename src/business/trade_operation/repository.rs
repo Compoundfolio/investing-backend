@@ -15,6 +15,13 @@ impl CommonRepository {
             .load(&mut self.pool.get()?)?)
     }
 
+    pub fn create_trade_operation(&self, trade_operation: InsertTradeOperation) -> Result<Uuid, RepositoryError> {
+        use schema::trade_operation::dsl;
+        Ok(diesel::insert_into(dsl::trade_operation)
+            .values(trade_operation)
+            .returning(dsl::id)
+            .get_result::<Uuid>(&mut self.pool.get()?)?)
+    }
 
     pub fn create_trade_operations(&self, trade_operations: Vec<InsertTradeOperation>) -> Result<usize, RepositoryError> {
         use schema::trade_operation::dsl;

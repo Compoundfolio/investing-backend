@@ -25,32 +25,7 @@ impl UserTransactionQuery {
     }
 }
 
-
-#[derive(Default)]
-pub struct UserTransactionMutation;
-#[Object(rename_fields="camelCase", rename_args="camelCase")]
-impl UserTransactionMutation {
-    /// Create a new user-transaction
-    async fn create_user_transaction(&self, _ctx: &Context<'_> /* , data: CreatePortfolio */ ) -> async_graphql::Result<String> {
-        // let claims = get_claims(ctx)?;
-        // let state = get_state(ctx)?;
-        // example : let created = state.repository.create_portfolio(claims.sub, &data.label)?;
-        // example : Ok(created.into())
-        Ok("OK".to_owned())
-    }
-
-    /// Delete a user transaction
-    async fn delete_user_transaction(&self, _ctx: &Context<'_>, _id: Uuid) -> async_graphql::Result<String> {
-        // let claims = get_claims(ctx)?;
-        // let state = get_state(ctx)?;
-        // example : state.repository.delete_portfolio(claims.sub, id)?;
-        Ok("OK".to_owned())
-    }
-}
-
 // --- model
-
-
 
 /// Depending on this type, some of the fields in the UserTransaction can 
 /// be present or absent. WARNING: Might contain undocumented values.

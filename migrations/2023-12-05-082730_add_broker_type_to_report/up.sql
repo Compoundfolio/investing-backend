@@ -53,4 +53,14 @@ ALTER TABLE "transaction" RENAME TO fiscal_transaction;
 
 -- 9. Cleanup of useless brokerage data
 DELETE FROM fiscal_transaction
-WHERE LOWER(operation_type)='trade'
+WHERE LOWER(operation_type)='trade';
+
+-- 10. Cascade deleteion
+ALTER TABLE fiscal_transaction DROP CONSTRAINT transaction_portfolio_id_fkey;
+ALTER TABLE fiscal_transaction ADD CONSTRAINT transaction_portfolio_id_fkey FOREIGN KEY (portfolio_id) REFERENCES portfolio(id) ON DELETE CASCADE;
+ALTER TABLE fiscal_transaction DROP CONSTRAINT transaction_report_upload_id_fkey;
+ALTER TABLE fiscal_transaction ADD CONSTRAINT transaction_report_upload_id_fkey FOREIGN KEY (report_upload_id) REFERENCES report_upload(id) ON DELETE CASCADE;
+ALTER TABLE trade_operation DROP CONSTRAINT trade_operation_portfolio_id_fkey;
+ALTER TABLE trade_operation ADD CONSTRAINT trade_operation_portfolio_id_fkey FOREIGN KEY (portfolio_id) REFERENCES portfolio(id) ON DELETE CASCADE;
+ALTER TABLE trade_operation DROP CONSTRAINT trade_operation_report_upload_id_fkey;
+ALTER TABLE trade_operation ADD CONSTRAINT trade_operation_report_upload_id_fkey FOREIGN KEY (report_upload_id) REFERENCES report_upload(id) ON DELETE CASCADE;
