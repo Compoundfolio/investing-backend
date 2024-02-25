@@ -70,6 +70,10 @@ async fn main() {
             "/graphql/sdl",
             axum::routing::get(|| async { graphql_schema_sdl }),
         )
+        .route(
+            "/version",
+            axum::routing::get(|| async { option_env!("CARGO_PKG_VERSION").unwrap_or("non-cargo-build") })
+        )
         .nest_service("/static", get_service(ServeDir::new("./static")))
         .layer(Extension(graphql_schema))
         .layer(cors)
