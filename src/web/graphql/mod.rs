@@ -14,6 +14,7 @@ use axum::{Extension, Router};
 
 use crate::auth::service::AuthClaims;
 use crate::business::fiscal_transaction::resource::FiscalTransactionMutation;
+use crate::business::trade_operation::resource::TradeOperationMutation;
 use crate::business::user_transaction::resource::UserTransactionQuery;
 use crate::ApplicationState;
 use crate::business::portfolio::resource::{PortfolioQuery, PortfolioMutation};
@@ -69,7 +70,7 @@ pub fn get_state<'ctx>(ctx: &Context<'ctx>) -> async_graphql::Result<&'ctx Arc<A
 #[derive(MergedObject, Default)]
 pub struct QueryRoot(MiscellaneousQuery, PortfolioQuery, UserTransactionQuery);
 #[derive(MergedObject, Default)]
-pub struct MutationRoot(PortfolioMutation, ReportMutation, FiscalTransactionMutation);
+pub struct MutationRoot(PortfolioMutation, ReportMutation, FiscalTransactionMutation, TradeOperationMutation);
 pub type ServiceSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 
 
