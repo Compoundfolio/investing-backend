@@ -46,6 +46,10 @@ ALTER TABLE "transaction"
 ALTER TABLE "trade_operation"
     ALTER COLUMN external_id DROP NOT NULL;
 ALTER TABLE "trade_operation"
+    ALTER COLUMN isin DROP NOT NULL;
+ALTER TABLE "trade_operation"
+    ALTER COLUMN order_id DROP NOT NULL;
+ALTER TABLE "trade_operation"
     ALTER COLUMN quantity SET NOT NULL;
 
 -- 8. Rename transaction table

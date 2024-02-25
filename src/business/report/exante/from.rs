@@ -28,11 +28,11 @@ impl From<super::model::TradeOperation> for TradeOperation {
                 super::model::TradeOperationSide::Sell => TradeOperationSide::Sell,
             },
             instrument_symbol: value.symbol_id,
-            isin: value.isin,
+            isin: Some(value.isin),
             price: Money::new(value.price, value.currency.clone()),
             quantity: value.quantity,
             commission: Some(Money::new(value.commission, value.commission_currency)),
-            order_id: value.order_id.to_string(),
+            order_id: Some(value.order_id.to_string()),
             summ: Money::new(value.traded_volume, value.currency),
             metadata: json!({
                 "uti": value.uti,

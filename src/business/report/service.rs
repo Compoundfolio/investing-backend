@@ -45,7 +45,7 @@ pub async fn process_report<R: tokio::io::AsyncRead + Unpin>(
     let inserted_trade_opertaions = state.repository.create_trade_operations(
         trade_operations.into_iter().map(|to| InsertTradeOperation {
             portfolio_id,
-            report_upload_id,
+            report_upload_id: Some(report_upload_id),
             trade_operation: to,
         }).collect()
     )?;
