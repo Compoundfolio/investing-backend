@@ -59,7 +59,7 @@ pub struct UserTransaction {
     /// total change of balance as a result of the transaction. Can be negative.
     pub summ: Money,
     /// Ticker of the related instrument. Appears in TRADE, DIVIDEND and sometimes TAX operations.
-    pub symbol: Option<String>,
+    pub ticker: Option<String>,
     /// Appears in TRADE. Contains always positive price of a single instrument.
     pub price: Option<Money>,
     /// Appears in TRADE. Contains always positive amount of securities in a trade.

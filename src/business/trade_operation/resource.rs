@@ -49,8 +49,8 @@ impl TradeOperationMutation {
 #[serde(rename_all = "camelCase")]
 struct CreateTradeOperation {
     pub portfolio_id: Uuid,
-    /// Ticker of the traded security.
-    pub instrument_symbol: String,
+    /// Ticker of the traded security, instrument symbol.
+    pub ticker: String,
 
     pub side: TradeOperationSide,
     /// Price of a single security in this transaction. Must be positive.
@@ -77,7 +77,7 @@ impl Into<InsertTradeOperation> for CreateTradeOperation {
                 operation_source: crate::business::model::OperationSource::Manual,
                 broker: self.brokerage,
                 side: self.side,
-                instrument_symbol: self.instrument_symbol,
+                instrument_symbol: self.ticker,
                 isin: self.isin,
                 price: self.price,
                 quantity: self.quantity,

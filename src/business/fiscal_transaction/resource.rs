@@ -55,7 +55,7 @@ struct CreateFiscalTransaction {
     pub date_time: NaiveDateTime,
     /// Associate this transaction with an instrument. Field value is validated.
     /// Must be present for DIVIDEND. Must be null for FUNDIG_WITHDRAWAL.
-    pub instrument_symbol: Option<String>,
+    pub ticker: Option<String>,
     /// Total transaction amount, negative if money is being withdrawn.
     /// Must be negative for TAX and COMISSION.
     /// Must be positive for DIVIDEND.
@@ -78,7 +78,7 @@ impl Into<InsertFiscalTransaction> for CreateFiscalTransaction {
                 broker: self.brokerage,
                 external_id: None,
                 date_time: self.date_time,
-                symbol_id: self.instrument_symbol,
+                symbol_id: self.ticker,
                 amount: self.amount,
                 operation_type: self.transaction_type.into(),
                 commission: None,
@@ -107,7 +107,7 @@ impl CustomValidator<CreateFiscalTransaction> for CreateFiscalTransactionValidat
     fn check(&self, value: &CreateFiscalTransaction) -> Result<(), InputValueError<CreateFiscalTransaction>> {
         match value.transaction_type {
             CreateableFiscalTransactionType::Dividend => {
-                if value.instrument_symbol.is_none() {
+                if value.ticker.is_none() {
                     Err(InputValueError::custom("DIVIDEND transaction must be associated with an instrument"))
                 } else if value.amount.amount.is_sign_negative() {
                     Err(InputValueError::custom("DIVIDEND transaction must contain positive amount"))
@@ -116,7 +116,7 @@ impl CustomValidator<CreateFiscalTransaction> for CreateFiscalTransactionValidat
                 }
             },
             CreateableFiscalTransactionType::FundingWithdrawal => {
-                if value.instrument_symbol.is_some() {
+                if value.ticker.is_some() {
                     Err(InputValueError::custom("FUNDING_WITHDRAWAL transaction can't be associated with an instrument"))
                 } else {
                     Ok(())
