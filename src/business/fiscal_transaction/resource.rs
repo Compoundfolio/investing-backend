@@ -54,18 +54,18 @@ struct CreateFiscalTransaction {
     /// Date and time at which this transaction occurred in a local timezone
     pub date_time: NaiveDateTime,
     /// Associate this transaction with an instrument. Field value is validated.
-    /// Must be present for DIVIDENT. Must be null for FUNDIG_WITHDRAWAL.
+    /// Must be present for DIVIDEND. Must be null for FUNDIG_WITHDRAWAL.
     pub instrument_symbol: Option<String>,
     /// Total transaction amount, negative if money is being withdrawn.
     /// Must be negative for TAX and COMISSION.
-    /// Must be positive for DIVIDENT.
+    /// Must be positive for DIVIDEND.
     pub amount: Money,
     pub transaction_type: CreateableFiscalTransactionType,
 }
 
 #[derive(async_graphql::Enum, Copy, Clone, Eq, PartialEq, Serialize, Deserialize)]
 enum CreateableFiscalTransactionType {
-    Tax, Divident, FundingWithdrawal, Comission
+    Tax, Dividend, FundingWithdrawal, Comission
 }
 
 impl Into<InsertFiscalTransaction> for CreateFiscalTransaction {
@@ -92,7 +92,7 @@ impl Into<FiscalTransactionType> for CreateableFiscalTransactionType {
     fn into(self) -> FiscalTransactionType {
         match self {
             CreateableFiscalTransactionType::Tax => FiscalTransactionType::Tax,
-            CreateableFiscalTransactionType::Divident => FiscalTransactionType::Dividend,
+            CreateableFiscalTransactionType::Dividend => FiscalTransactionType::Dividend,
             CreateableFiscalTransactionType::FundingWithdrawal => FiscalTransactionType::FundingWithdrawal,
             CreateableFiscalTransactionType::Comission => FiscalTransactionType::Commission,
         }
@@ -106,11 +106,11 @@ struct CreateFiscalTransactionValidator { }
 impl CustomValidator<CreateFiscalTransaction> for CreateFiscalTransactionValidator {
     fn check(&self, value: &CreateFiscalTransaction) -> Result<(), InputValueError<CreateFiscalTransaction>> {
         match value.transaction_type {
-            CreateableFiscalTransactionType::Divident => {
+            CreateableFiscalTransactionType::Dividend => {
                 if value.instrument_symbol.is_none() {
-                    Err(InputValueError::custom("DIVIDENT transaction must be associated with an instrument"))
+                    Err(InputValueError::custom("DIVIDEND transaction must be associated with an instrument"))
                 } else if value.amount.amount.is_sign_negative() {
-                    Err(InputValueError::custom("DIVIDENT transaction must contain positive amount"))
+                    Err(InputValueError::custom("DIVIDEND transaction must contain positive amount"))
                 } else {
                     Ok(())
                 }

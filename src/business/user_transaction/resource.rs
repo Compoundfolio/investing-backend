@@ -35,10 +35,10 @@ pub enum UserTransactionType {
     /// An unknown type of transaction was recieved from a brokerage report.
     Unrecognized,
     Tax,
-    Divident,
+    Dividend,
     Comission,
     FundingWithdrawal,
-    RevertedDivident,
+    RevertedDividend,
 }
 
 #[derive(async_graphql::Enum, Copy, Clone, Eq, PartialEq, Serialize)]
@@ -58,7 +58,7 @@ pub struct UserTransaction {
     pub brokerage: Option<BrokerType>,
     /// total change of balance as a result of the transaction. Can be negative.
     pub summ: Money,
-    /// Ticker of the related instrument. Appears in TRADE, DIVIDENT and sometimes TAX operations.
+    /// Ticker of the related instrument. Appears in TRADE, DIVIDEND and sometimes TAX operations.
     pub symbol: Option<String>,
     /// Appears in TRADE. Contains always positive price of a single instrument.
     pub price: Option<Money>,

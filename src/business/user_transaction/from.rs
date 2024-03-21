@@ -7,10 +7,10 @@ impl From<FiscalTransactionType> for UserTransactionType {
     fn from(value: FiscalTransactionType) -> Self {
         match value {
             FiscalTransactionType::Tax => UserTransactionType::Tax,
-            FiscalTransactionType::Dividend => UserTransactionType::Divident,
+            FiscalTransactionType::Dividend => UserTransactionType::Dividend,
             FiscalTransactionType::Commission => UserTransactionType::Comission,
             FiscalTransactionType::FundingWithdrawal => UserTransactionType::FundingWithdrawal,
-            FiscalTransactionType::RevertedDividend => UserTransactionType::RevertedDivident,
+            FiscalTransactionType::RevertedDividend => UserTransactionType::RevertedDividend,
             FiscalTransactionType::Unrecognized(_) => UserTransactionType::Unrecognized
         }
     }
