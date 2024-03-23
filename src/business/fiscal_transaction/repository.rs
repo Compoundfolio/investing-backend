@@ -15,6 +15,13 @@ impl CommonRepository {
             .load(&mut self.pool.get()?)?)
     }
 
+    pub fn count_fiscal_transactions(&self, portfolio_id: Uuid) -> Result<i64, RepositoryError> {
+        Ok(dsl::fiscal_transaction
+            .filter(dsl::portfolio_id.eq(portfolio_id))
+            .count()
+            .get_result::<i64>(&mut self.pool.get()?)?)
+    }
+
     pub fn find_fiscal_transaction_by_id(&self, fiscal_transaction_id: Uuid) -> Result<Option<SelectFiscalTransaction>, RepositoryError> {
         Ok(dsl::fiscal_transaction
             .filter(dsl::id.eq(fiscal_transaction_id))

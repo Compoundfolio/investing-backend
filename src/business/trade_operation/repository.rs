@@ -14,6 +14,13 @@ impl CommonRepository {
             .load(&mut self.pool.get()?)?)
     }
 
+    pub fn count_trade_operations(&self, portfolio_id: Uuid) -> Result<i64, RepositoryError> {
+        Ok(dsl::trade_operation
+            .filter(dsl::portfolio_id.eq(portfolio_id))
+            .count()
+            .get_result::<i64>(&mut self.pool.get()?)?)
+    }
+
     pub fn find_trade_operation_by_id(&self, trade_operation_id: Uuid) -> Result<Option<SelectTradeOperation>, RepositoryError> {
         Ok(dsl::trade_operation
             .filter(dsl::id.eq(trade_operation_id))
