@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::{business::{fiscal_transaction::model::{FiscalTransactionType, InsertFiscalTransaction}, model::BrokerType, report::model::InsertReportUpload, trade_operation::model::InsertTradeOperation}, web::graphql::errors::DescriptiveError, ApplicationState};
+use crate::{business::{fiscal_transaction::model::{FiscalTransactionType, InsertFiscalTransaction}, model::BrokerType, report::model::InsertReportUpload, trade_operation::model::InsertTradeOperation}, web::errors::DescriptiveError, ApplicationState};
 
 use super::model::{AbstractReport, ReportProcessingError, ReportProcessingResult};
 

@@ -30,14 +30,11 @@ impl CommonRepository {
             .get_result::<Uuid>(&mut self.pool.get()?)?)
     }
 
-    pub fn delete_fiscal_transaction(&self, id: Uuid) -> Result<(), RepositoryError> {
+    pub fn delete_fiscal_transaction(&self, id: Uuid) -> Result<usize, RepositoryError> {
         let affected = diesel::delete(dsl::fiscal_transaction
             .filter(dsl::id.eq(id)))
             .execute(&mut self.pool.get()?)?;
-        match affected {
-            0 => Err(RepositoryError::NoRowsAffected),
-            _ => Ok(())
-        }
+        Ok(affected)
     }
 
     pub fn create_fiscal_transactions(&self, fiscal_transactions: Vec<InsertFiscalTransaction>) -> Result<usize, RepositoryError> {

@@ -1,5 +1,17 @@
 use crate::{business::report::model::ReportProcessingError, database::RepositoryError};
 
+use serde::Serialize;
+
+// for REST api
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CommonErrorResponse {
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub details: Option<String>,
+    pub developer_message: String,
+}
+
 #[derive(thiserror::Error, Debug)]
 pub enum DescriptiveError {
     #[error("No valid authorization credentials were provided in this request")]
@@ -28,9 +40,6 @@ impl async_graphql::ErrorExtensions for DescriptiveError {
                 },
                 DescriptiveError::NotFound{..} => {
                     e.set("code", "NOT_FOUND");
-                },
-                DescriptiveError::RepositoryError(RepositoryError::NoRowsAffected) => {
-                    e.set("code", "NO_ROWS_AFFECTED");
                 },
                 DescriptiveError::RepositoryError(_) => {
                     e.set("code", "REPOSITORY_ERROR");

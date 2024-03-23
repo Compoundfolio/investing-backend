@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::{web::graphql::errors::DescriptiveError, ApplicationState};
+use crate::{web::errors::DescriptiveError, ApplicationState};
 
 // struct PortfolioOwnerGuard { }
 // #[async_trait::async_trait]

@@ -17,9 +17,7 @@ pub enum RepositoryError {
     Diesel {
         #[from]
         source: diesel::result::Error,
-    },
-    #[error("Database update was cancelled, no data was updated")]
-    NoRowsAffected
+    }
 }
 
 pub struct CommonRepository {

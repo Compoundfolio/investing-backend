@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::{business::user_transaction::resource::UserTransaction, web::graphql::errors::DescriptiveError, ApplicationState};
+use crate::{business::user_transaction::resource::UserTransaction, web::errors::DescriptiveError, ApplicationState};
 
 
 pub fn generate_user_transaction_list(state: &ApplicationState, portfolio_id: Uuid) -> Result<Vec<UserTransaction>, DescriptiveError> {

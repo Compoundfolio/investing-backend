@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::business::portfolio::security::is_portfolio_owner;
 use crate::business::model::{BrokerType, Money};
-use crate::web::graphql::errors::DescriptiveError;
+use crate::web::errors::DescriptiveError;
 use crate::web::graphql::{get_claims, get_state};
 
 use super::model::{InsertTradeOperation, TradeOperation, TradeOperationSide};
@@ -68,21 +68,21 @@ struct CreateTradeOperation {
 }
 
 
-impl Into<InsertTradeOperation> for CreateTradeOperation {
-    fn into(self) -> InsertTradeOperation {
+impl From<CreateTradeOperation> for InsertTradeOperation {
+    fn from(val: CreateTradeOperation) -> Self {
         InsertTradeOperation {
-            portfolio_id: self.portfolio_id,
+            portfolio_id: val.portfolio_id,
             report_upload_id: None,
             trade_operation: TradeOperation {
                 operation_source: crate::business::model::OperationSource::Manual,
-                broker: self.brokerage,
-                side: self.side,
-                instrument_symbol: self.ticker,
-                isin: self.isin,
-                price: self.price,
-                quantity: self.quantity,
-                summ: self.summ,
-                date_time: self.date_time,
+                broker: val.brokerage,
+                side: val.side,
+                instrument_symbol: val.ticker,
+                isin: val.isin,
+                price: val.price,
+                quantity: val.quantity,
+                summ: val.summ,
+                date_time: val.date_time,
                 order_id: None,
                 external_id: None,
                 commission: None,

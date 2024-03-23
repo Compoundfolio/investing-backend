@@ -16,7 +16,7 @@ use crate::database::schema::{self, sql_types::CustomMoney};
 // --- fiscal transactions and trade operations
 
 #[derive(Deserialize_enum_str, Serialize_enum_str)]
-#[derive(diesel_derive_enum::DbEnum, Debug, async_graphql::Enum, Copy, Clone, Eq, PartialEq)]
+#[derive(diesel_derive_enum::DbEnum, Debug, async_graphql::Enum, Copy, Clone, Eq, PartialEq, PartialOrd, Ord)]
 #[ExistingTypePath = "crate::database::schema::sql_types::BrokerType"]
 pub enum BrokerType {
     Exante, Freedomfinance

@@ -29,14 +29,11 @@ impl CommonRepository {
             .get_result::<Uuid>(&mut self.pool.get()?)?)
     }
 
-    pub fn delete_trade_operation(&self, id: Uuid) -> Result<(), RepositoryError> {
+    pub fn delete_trade_operation(&self, id: Uuid) -> Result<usize, RepositoryError> {
         let affected = diesel::delete(dsl::trade_operation
             .filter(dsl::id.eq(id)))
             .execute(&mut self.pool.get()?)?;
-        match affected {
-            0 => Err(RepositoryError::NoRowsAffected),
-            _ => Ok(())
-        }
+        Ok(affected)
     }
 
     pub fn create_trade_operations(&self, trade_operations: Vec<InsertTradeOperation>) -> Result<usize, RepositoryError> {

@@ -20,8 +20,6 @@ use crate::ApplicationState;
 use crate::business::portfolio::resource::{PortfolioQuery, PortfolioMutation};
 use crate::business::report::resource::ReportMutation;
 
-pub mod errors;
-
 pub mod model {
     // use serde::Serialize;
 
@@ -57,7 +55,7 @@ pub fn get_claims<'ctx>(ctx: &Context<'ctx>) -> async_graphql::Result<&'ctx Auth
     return ctx
         .data::<Claims>()?
         .as_ref()
-        .ok_or_else(|| errors::DescriptiveError::Unauthorized.extend() );
+        .ok_or_else(|| super::errors::DescriptiveError::Unauthorized.extend() );
 }
 
 pub fn get_state<'ctx>(ctx: &Context<'ctx>) -> async_graphql::Result<&'ctx Arc<ApplicationState>> {

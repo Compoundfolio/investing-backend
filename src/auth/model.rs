@@ -12,7 +12,7 @@ use uuid::Uuid;
 
 use crate::database::schema;
 use crate::database::RepositoryError;
-use crate::web::CommonErrorResponse;
+use crate::web::errors::CommonErrorResponse;
 
 // --- orm
 
@@ -219,7 +219,7 @@ fn validate_password(pass: &str) -> Result<(), ValidationError> {
     }
     if analyzed.symbols_count() < 1 {
         return Err(ValidationError::new(
-            "Password should contain at least 1 symbol",
+            "Password should contain at least 1 special symbol",
         ));
     }
     Ok(())

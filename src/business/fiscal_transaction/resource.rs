@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::business::portfolio::security::is_portfolio_owner;
 use crate::business::model::{BrokerType, Money};
-use crate::web::graphql::errors::DescriptiveError;
+use crate::web::errors::DescriptiveError;
 use crate::web::graphql::{get_claims, get_state};
 
 use super::model::{FiscalTransaction, FiscalTransactionType, InsertFiscalTransaction};
@@ -68,19 +68,19 @@ enum CreateableFiscalTransactionType {
     Tax, Dividend, FundingWithdrawal, Comission
 }
 
-impl Into<InsertFiscalTransaction> for CreateFiscalTransaction {
-    fn into(self) -> InsertFiscalTransaction {
+impl From<CreateFiscalTransaction> for InsertFiscalTransaction {
+    fn from(val: CreateFiscalTransaction) -> Self {
         InsertFiscalTransaction {
-            portfolio_id: self.portfolio_id,
+            portfolio_id: val.portfolio_id,
             report_upload_id: None,
             fiscal_transaction: FiscalTransaction {
                 operation_source: crate::business::model::OperationSource::Manual,
-                broker: self.brokerage,
+                broker: val.brokerage,
                 external_id: None,
-                date_time: self.date_time,
-                symbol_id: self.ticker,
-                amount: self.amount,
-                operation_type: self.transaction_type.into(),
+                date_time: val.date_time,
+                symbol_id: val.ticker,
+                amount: val.amount,
+                operation_type: val.transaction_type.into(),
                 commission: None,
                 metadata: serde_json::Value::Null,
             },
@@ -88,9 +88,9 @@ impl Into<InsertFiscalTransaction> for CreateFiscalTransaction {
     }
 }
 
-impl Into<FiscalTransactionType> for CreateableFiscalTransactionType {
-    fn into(self) -> FiscalTransactionType {
-        match self {
+impl From<CreateableFiscalTransactionType> for FiscalTransactionType {
+    fn from(val: CreateableFiscalTransactionType) -> Self {
+        match val {
             CreateableFiscalTransactionType::Tax => FiscalTransactionType::Tax,
             CreateableFiscalTransactionType::Dividend => FiscalTransactionType::Dividend,
             CreateableFiscalTransactionType::FundingWithdrawal => FiscalTransactionType::FundingWithdrawal,
