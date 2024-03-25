@@ -42,6 +42,18 @@ impl CommonRepository {
             .execute(&mut self.pool.get()?)?;
         Ok(affected)
     }
+    pub fn delete_trade_operations_with_user_id(&self, ids: Vec<Uuid>, app_user_id: Uuid) -> Result<usize, RepositoryError> {
+        let valid_ids: Vec<Uuid> = dsl::trade_operation
+            .inner_join(crate::database::schema::portfolio::dsl::portfolio)
+            .filter(crate::database::schema::portfolio::dsl::app_user_id.eq(app_user_id))
+            .filter(dsl::id.eq_any(ids))
+            .select(dsl::id)
+            .load(&mut self.pool.get()?)?;
+        let affected = diesel::delete(dsl::trade_operation
+            .filter(dsl::id.eq_any(valid_ids)))
+            .execute(&mut self.pool.get()?)?;
+        Ok(affected)
+    }
 
     pub fn create_trade_operations(&self, trade_operations: Vec<InsertTradeOperation>) -> Result<usize, RepositoryError> {
         Ok(insert_into(schema::trade_operation::dsl::trade_operation)

@@ -5,7 +5,6 @@ use uuid::Uuid;
 
 use crate::business::portfolio::security::is_portfolio_owner;
 use crate::business::model::{BrokerType, Money};
-use crate::web::errors::DescriptiveError;
 use crate::web::graphql::{get_claims, get_state};
 
 use super::model::{FiscalTransaction, FiscalTransactionType, InsertFiscalTransaction};
@@ -30,15 +29,11 @@ impl FiscalTransactionMutation {
         Ok(created)
     }
 
-    /// Delete a fiscal transaction transaction
-    async fn delete_fiscal_transaction(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<String> {
+    /// Delete a fiscal transaction transaction. Returns number of deleted rows.
+    async fn delete_fiscal_transactions(&self, ctx: &Context<'_>, ids: Vec<Uuid>) -> async_graphql::Result<usize> {
         let claims = get_claims(ctx)?;
         let state = get_state(ctx)?;
-        let to_be_deleted = state.repository.find_fiscal_transaction_by_id(id)?
-            .ok_or(DescriptiveError::NotFound { resource: "fiscal transaction".to_owned() })?;
-        is_portfolio_owner(state, claims.sub, to_be_deleted.portfolio_id)?;
-        state.repository.delete_fiscal_transaction(id)?;
-        Ok("OK".to_owned())
+        Ok(state.repository.delete_fiscal_transactions_with_user_id(ids, claims.sub)?)
     }
 }
 

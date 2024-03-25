@@ -44,6 +44,19 @@ impl CommonRepository {
         Ok(affected)
     }
 
+    pub fn delete_fiscal_transactions_with_user_id(&self, ids: Vec<Uuid>, app_user_id: Uuid) -> Result<usize, RepositoryError> {
+        let valid_ids: Vec<Uuid> = dsl::fiscal_transaction
+            .inner_join(crate::database::schema::portfolio::dsl::portfolio)
+            .filter(crate::database::schema::portfolio::dsl::app_user_id.eq(app_user_id))
+            .filter(dsl::id.eq_any(ids))
+            .select(dsl::id)
+            .load(&mut self.pool.get()?)?;
+        let affected = diesel::delete(dsl::fiscal_transaction
+            .filter(dsl::id.eq_any(valid_ids)))
+            .execute(&mut self.pool.get()?)?;
+        Ok(affected)
+    }
+
     pub fn create_fiscal_transactions(&self, fiscal_transactions: Vec<InsertFiscalTransaction>) -> Result<usize, RepositoryError> {
         Ok(insert_into(dsl::fiscal_transaction)
             .values(fiscal_transactions)
